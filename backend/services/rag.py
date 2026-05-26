@@ -16,7 +16,14 @@ COLLECTION_NAME = "chapter_chunks"
 TOP_K = 5
 SCORE_THRESHOLD = 0.70
 
-_qdrant = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
+_qdrant: QdrantClient | None = None
+
+
+def _get_qdrant() -> QdrantClient:
+    global _qdrant
+    if _qdrant is None:
+        _qdrant = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
+    return _qdrant
 
 
 def embed_query(text: str) -> list[float]:
@@ -41,7 +48,7 @@ def search_qdrant(
             must=[FieldCondition(key="chapter_id", match=MatchValue(value=chapter_id))]
         )
 
-    result = _qdrant.query_points(
+    result = _get_qdrant().query_points(
         collection_name=COLLECTION_NAME,
         query=vector,
         limit=top_k,
