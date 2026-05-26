@@ -1,6 +1,6 @@
 fastapi==0.111.*
 uvicorn[standard]
-google-generativeai
+google-generativeai==0.8.6
 qdrant-client
 asyncpg
 psycopg2-binary
