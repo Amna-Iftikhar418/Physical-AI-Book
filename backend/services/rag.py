@@ -41,9 +41,9 @@ def search_qdrant(
             must=[FieldCondition(key="chapter_id", match=MatchValue(value=chapter_id))]
         )
 
-    hits = _qdrant.search(
+    result = _qdrant.query_points(
         collection_name=COLLECTION_NAME,
-        query_vector=vector,
+        query=vector,
         limit=top_k,
         score_threshold=SCORE_THRESHOLD,
         query_filter=query_filter,
@@ -56,7 +56,7 @@ def search_qdrant(
             "text": h.payload.get("text", ""),
             "score": h.score,
         }
-        for h in hits
+        for h in result.points
     ]
 
 

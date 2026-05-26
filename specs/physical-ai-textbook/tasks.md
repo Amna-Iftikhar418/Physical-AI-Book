@@ -138,10 +138,10 @@
 
 **Dependency**: Requires T049 (`POST /api/chat/select`) and T055 (`Root.tsx`) from Phase 3.
 
-- [ ] T058 [US2] Implement `POST /api/chat/select` in `backend/routers/chat.py` — same RAG pipeline as `/api/chat` but Qdrant search filtered by `chapter_id` using `FieldCondition(key="chapter_id", match=MatchValue(value=body.chapter_id))`; `chapter_id` is required (returns 400 if missing) — `backend/routers/chat.py`
-- [ ] T059 [US2] Create `book/src/components/ChatWidget/SelectionButton.tsx` — renders floating "Ask about this" button positioned via `getBoundingClientRect()` of selection; hidden by default; triggers `ChatPanel` pre-fill with selected text + `chapter_id` extracted from current page path — `book/src/components/ChatWidget/SelectionButton.tsx`
-- [ ] T060 [US2] Extend `book/src/theme/Root.tsx` — add `mouseup` event listener: if `window.getSelection().toString().trim().length >= 10` show `SelectionButton` near selection rect; else hide it — `book/src/theme/Root.tsx`
-- [ ] T061 [US2] Wire `SelectionButton` click → opens `ChatPanel` with `selected_text` pre-filled in input and `chapter_id` stored for the `/api/chat/select` call — `book/src/components/ChatWidget/SelectionButton.tsx`, `book/src/components/ChatWidget/ChatPanel.tsx`
+- [X] T058 [US2] Implement `POST /api/chat/select` in `backend/routers/chat.py` — same RAG pipeline as `/api/chat` but Qdrant search filtered by `chapter_id` using `FieldCondition(key="chapter_id", match=MatchValue(value=body.chapter_id))`; `chapter_id` is required (returns 400 if missing) — `backend/routers/chat.py`
+- [X] T059 [US2] Create `book/src/components/ChatWidget/SelectionButton.tsx` — renders floating "Ask about this" button positioned via `getBoundingClientRect()` of selection; hidden by default; triggers `ChatPanel` pre-fill with selected text + `chapter_id` extracted from current page path — `book/src/components/ChatWidget/SelectionButton.tsx`
+- [X] T060 [US2] Extend `book/src/theme/Root.tsx` — add `mouseup` event listener: if `window.getSelection().toString().trim().length >= 10` show `SelectionButton` near selection rect; else hide it — `book/src/theme/Root.tsx`
+- [X] T061 [US2] Wire `SelectionButton` click → opens `ChatPanel` with `selected_text` pre-filled in input and `chapter_id` stored for the `/api/chat/select` call — `book/src/components/ChatWidget/SelectionButton.tsx`, `book/src/components/ChatWidget/ChatPanel.tsx`
 - [ ] T062 [US2] Deploy and verify text-selection gate at live URL: highlight text → button appears within 200ms → chat opens pre-filled → response is chapter-scoped
 
 **Checkpoint**: US1 + US2 fully verified at live URL. P1 base gate complete.

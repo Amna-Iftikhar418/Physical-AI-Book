@@ -4,6 +4,97 @@ This file is generated during init for the selected agent.
 
 You are an expert AI assistant specializing in Spec-Driven Development (SDD). Your primary goal is to work with the architext to build products.
 
+---
+
+## Project: Physical AI & Humanoid Robotics Textbook
+
+**Hackathon**: Panaversity Hackathon I | **Deadline**: Nov 30, 2025, 6:00 PM
+**Scoring**: 300 pts max — 100 base (book + chatbot required together), +50 each for subagents, auth, personalization, Urdu translation
+**Live site**: `https://Amna-Iftikhar418.github.io/Physical-AI-Book/`
+**Constitution**: `.specify/memory/constitution.md` — authoritative for all product decisions
+
+### Architecture
+
+| Layer | Stack | Deployed on |
+|-------|-------|-------------|
+| Book (frontend) | Docusaurus 3.10.1 + React 19 + TypeScript | GitHub Pages |
+| AI/RAG (backend) | FastAPI + uvicorn, Python, `google-generativeai` SDK | Railway |
+| Vector store | Qdrant Cloud — collection `chapter_chunks` | Qdrant Cloud free tier |
+| Relational DB | Neon Serverless Postgres — sessions + conversations | Neon free tier |
+
+### Running locally
+
+```powershell
+# Backend — from C:\Hackathon 1\backend\
+.venv\Scripts\uvicorn main:app --reload          # port 8000
+
+# Frontend — from C:\Hackathon 1\book\
+npm start                                         # port 3000
+```
+
+Always use `.venv\Scripts\uvicorn` (not system uvicorn). Use **PowerShell tool** for Windows paths — Bash tool cannot resolve backslash paths.
+
+### Required backend .env
+
+```
+GOOGLE_API_KEY=...
+QDRANT_URL=...
+QDRANT_API_KEY=...
+DATABASE_URL=...          # Neon Postgres connection string
+CORS_ORIGINS=http://localhost:3000,https://Amna-Iftikhar418.github.io
+```
+
+`backend/config.py` raises `EnvironmentError` at startup if any required key is missing.
+
+### Key source files
+
+| File | Role |
+|------|------|
+| `backend/main.py` | FastAPI app entry point, CORS middleware |
+| `backend/config.py` | Env var validation and loading |
+| `backend/routers/chat.py` | `POST /api/chat`, `POST /api/chat/select` |
+| `backend/routers/health.py` | `GET /health` → `{"status":"ok","version":"1.0.0"}` |
+| `backend/services/rag.py` | Full RAG pipeline: embed → Qdrant search → Gemini generate |
+| `backend/services/agents.py` | `book_model` (`gemini-2.5-flash`) + system prompt |
+| `backend/db/models.py` | SQLAlchemy models: `Conversation`, `Message` |
+| `book/docusaurus.config.ts` | `customFields.apiUrl` — backend URL for frontend |
+| `book/src/lib/api-client.ts` | Frontend API calls — reads URL from `siteConfig.customFields` |
+| `book/src/components/ChatWidget/` | Chat panel UI (💬 button + panel) |
+| `.claude/agents/qdrant-indexer.md` | Subagent: index book content into Qdrant |
+| `.claude/commands/generate-chapter-outline.md` | Agent skill: generate chapter outlines |
+
+### Models actually in use (may differ from spec)
+
+| Purpose | Model ID | Notes |
+|---------|---------|-------|
+| Chat / generation | `gemini-2.5-flash` | Switched from `gemini-2.0-flash` — free-tier quota exhausted |
+| Embeddings | `models/gemini-embedding-2` | 1536 dims; task_type `retrieval_query` / `retrieval_document` |
+| Qdrant collection | `chapter_chunks` | score_threshold 0.70, top_k 5 |
+
+### API endpoints
+
+| Method | Path | Request | Response |
+|--------|------|---------|----------|
+| GET | `/health` | — | `{"status":"ok","version":"1.0.0"}` |
+| POST | `/api/chat` | `{query, session_id?, chapter_id?}` | `{answer, session_id, sources[]}` |
+| POST | `/api/chat/select` | `{query, session_id?, chapter_id}` | `{answer, session_id, sources[]}` |
+
+RAG errors surface as HTTP 503 `"RAG pipeline unavailable: {exc}"`. DB write failures are non-fatal (rollback + proceed).
+
+### Known pitfalls — do NOT reintroduce
+
+1. **qdrant-client v1.18.0**: `.search()` removed — use `.query_points()`. Parameter is `query=` (not `query_vector=`). Results are `result.points`, not a direct list.
+2. **Docusaurus + webpack 5**: `process` is not polyfilled in the browser. Never use `process.env.*` in client modules. Use `import siteConfig from '@generated/docusaurus.config'` and read from `siteConfig.customFields.apiUrl`.
+3. **Gemini quota**: `gemini-2.0-flash` and `gemini-2.0-flash-lite` have exhausted free-tier quota on the project API key. Use `gemini-2.5-flash`.
+4. **Backend root**: `GET /` → `{"detail":"Not Found"}` is expected — no root route exists. Test via `http://localhost:3000`, not `http://localhost:8000`.
+
+### Deployment pipeline
+
+- **Frontend**: `.github/workflows/deploy-book.yml` → GitHub Pages (auto on push to `main`)
+- **Backend**: Railway auto-deploys from `main`; env vars set in Railway dashboard
+
+---
+
 ## Task context
 
 **Your Surface:** You operate on a project level, providing guidance to users and executing development tasks via a defined set of tools.

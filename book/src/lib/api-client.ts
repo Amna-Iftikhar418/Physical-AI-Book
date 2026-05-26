@@ -1,4 +1,5 @@
-const BASE_URL = (process.env.REACT_APP_API_URL ?? 'http://localhost:8000').replace(/\/$/, '');
+import siteConfig from '@generated/docusaurus.config';
+const BASE_URL = (((siteConfig.customFields?.apiUrl) as string | undefined) ?? 'http://localhost:8000').replace(/\/$/, '');
 const TIMEOUT_MS = 45_000;
 
 export interface ChatPayload {

@@ -30,7 +30,7 @@ const config: Config = {
   },
 
   customFields: {
-    apiUrl: process.env.REACT_APP_API_URL ?? 'http://localhost:8000',
+    apiUrl: process.env.DOCUSAURUS_API_URL ?? 'http://localhost:8000',
   },
 
   presets: [
