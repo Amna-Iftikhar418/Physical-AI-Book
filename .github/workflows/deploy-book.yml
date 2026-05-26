@@ -33,7 +33,7 @@ jobs:
         working-directory: book
         run: npm run build
         env:
-          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+          REACT_APP_API_URL: https://physical-ai-book-production-1c62.up.railway.app
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

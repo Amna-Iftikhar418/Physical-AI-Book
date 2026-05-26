@@ -11,12 +11,11 @@ const config: Config = {
     v4: true,
   },
 
-  // TODO: update to final GitHub Pages URL before deployment (T038)
-  url: 'https://your-github-username.github.io',
-  baseUrl: '/physical-ai-textbook/',
+  url: 'https://Amna-Iftikhar418.github.io',
+  baseUrl: '/Physical-AI-Book/',
 
-  organizationName: 'your-github-username',
-  projectName: 'physical-ai-textbook',
+  organizationName: 'Amna-Iftikhar418',
+  projectName: 'Physical-AI-Book',
 
   onBrokenLinks: 'throw',
   markdown: {
@@ -69,7 +68,7 @@ const config: Config = {
           label: 'Textbook',
         },
         {
-          href: 'https://github.com/your-github-username/physical-ai-textbook',
+          href: 'https://github.com/Amna-Iftikhar418/Physical-AI-Book',
           label: 'GitHub',
           position: 'right',
         },
