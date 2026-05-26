@@ -1,0 +1,10 @@
+fastapi==0.111.*
+uvicorn[standard]
+google-generativeai
+qdrant-client
+asyncpg
+psycopg2-binary
+sqlalchemy[asyncio]
+alembic
+python-dotenv
+pydantic
