@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import siteConfig from '@generated/docusaurus.config';
 import { ChatPanel } from '../components/ChatWidget/ChatPanel';
 import { SelectionButton } from '../components/ChatWidget/SelectionButton';
 
@@ -21,9 +22,19 @@ const FAB_STYLE: React.CSSProperties = {
   zIndex: 9998,
 };
 
+// Docs are served at the site root (routeBasePath '/'), under baseUrl
+// (e.g. '/Physical-AI-Book/'). Strip baseUrl to recover the chapter_id,
+// which matches the manifest/Qdrant keys (e.g. 'module-1-ros2/week-1-2-foundations').
+// Landing pages resolve to '/module-x/'; the backend maps the bare path to
+// '<path>/index' when an exact match yields no chunks.
 function getChapterIdFromPath(): string | undefined {
-  const match = window.location.pathname.match(/\/docs\/(.+)/);
-  return match ? match[1] : undefined;
+  const baseUrl = siteConfig.baseUrl || '/';
+  let path = window.location.pathname;
+  if (path.startsWith(baseUrl)) {
+    path = path.slice(baseUrl.length);
+  }
+  path = path.replace(/^\/+/, '').replace(/\/+$/, '');
+  return path === '' ? 'intro' : path;
 }
 
 export default function Root({ children }: { children: React.ReactNode }) {

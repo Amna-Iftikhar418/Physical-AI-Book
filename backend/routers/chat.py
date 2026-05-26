@@ -51,6 +51,9 @@ async def _run_chat(
     try:
         vector = embed_query(query)
         chunks = search_qdrant(vector, chapter_id=chapter_id)
+        # Landing pages are served at '/module-x/' but stored as 'module-x/index'.
+        if chapter_id and not chunks and not chapter_id.endswith("/index"):
+            chunks = search_qdrant(vector, chapter_id=f"{chapter_id}/index")
         answer = await run_rag_query(query, chunks)
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"RAG pipeline unavailable: {exc}") from exc
