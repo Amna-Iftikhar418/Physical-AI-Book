@@ -1,3 +1,9 @@
+---
+name: qdrant-indexer
+description: Use this agent to re-index the Physical AI textbook into Qdrant after chapter MDX files change. It rebuilds docs_manifest.json if needed, runs backend/subagents/index_to_qdrant.py, and reports chunk/chapter counts plus any failures.
+tools: Bash, Read, Glob
+---
+
 # qdrant-indexer
 
 Subagent for indexing Physical AI textbook chapter content into Qdrant Cloud after any MDX chapter is created or updated.
@@ -15,9 +21,11 @@ It should also be invoked manually after running `build_manifest.py`.
 1. **Verify prerequisites** — checks that `backend/docs_manifest.json` exists and is non-empty
 2. **Run the indexer** — executes `python backend/subagents/index_to_qdrant.py`
 3. **Confirm output** — reads stdout and reports:
-   - `Indexed N chunks across M chapters`
-   - Any failed `chapter_id` entries (with error message)
-4. **Validate** — runs a quick count query against the Qdrant `chapter_chunks` collection to verify chunk count is ≥ expected
+   - `Loaded manifest: <M> chapters` (chapters seen)
+   - `Total chunks to index: <N>` (chunks built)
+   - `Indexing complete. Total points in collection: <N>` (final count in Qdrant)
+   - Any `WARNING: Failed chapters: {...}` line (failed `chapter_id` set)
+4. **Validate** — confirms the final `Total points in collection` count is ≥ the number of chunks built (no silent drops)
 
 ## Instructions for the AI
 
@@ -32,17 +40,21 @@ When invoked:
    cd "C:\Hackathon 1" && python backend/subagents/index_to_qdrant.py
    ```
 
-3. Parse the output:
-   - Look for lines matching `Indexed \d+ chunks` — report total
-   - Look for lines matching `ERROR` or `FAILED` — report any failures
-   - If the script exits non-zero, report the error and suggest checking `QDRANT_URL` / `QDRANT_API_KEY` in `.env`
+3. Parse the output (actual strings printed by `index_to_qdrant.py`):
+   - `Loaded manifest: <M> chapters` — number of chapters read from the manifest
+   - `Total chunks to index: <N>` — number of chunks built
+   - `Indexing complete. Total points in collection: <N>` — final Qdrant count
+   - `WARNING: Failed chapters: {...}` (stderr) — any failed `chapter_id` set
+   - `ERROR: ... not found` — manifest missing; run `build_manifest.py` first
+   - If the script exits non-zero, report the error and suggest checking `QDRANT_URL` / `QDRANT_API_KEY` / `GOOGLE_API_KEY` in `.env`
 
 4. After successful indexing, confirm:
    ```
    qdrant-indexer complete:
-     Chapters indexed: <M>
-     Total chunks: <N>
-     Failed chapters: <list or "none">
+     Chapters indexed: <M>      (from "Loaded manifest")
+     Total chunks: <N>          (from "Total chunks to index")
+     Points in collection: <N>  (from "Indexing complete. Total points...")
+     Failed chapters: <set or "none">
      Qdrant collection: chapter_chunks
    ```
 

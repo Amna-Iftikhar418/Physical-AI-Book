@@ -1,6 +1,13 @@
+---
+description: Generate a structured Markdown chapter outline (H2 sections, sub-topic bullets, code-example placeholders, learning objectives) for a Physical AI & Humanoid Robotics textbook chapter, grounded in the constitution.
+argument-hint: <chapter-id>
+---
+
 # generate-chapter-outline
 
 Generate a structured Markdown chapter outline for the Physical AI & Humanoid Robotics textbook.
+
+The requested chapter id is: **$ARGUMENTS**
 
 ## Usage
 

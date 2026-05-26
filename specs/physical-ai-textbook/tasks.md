@@ -156,9 +156,9 @@
 
 **Dependency**: None — independent of auth. Can begin immediately after P1 gate.
 
-- [ ] T063 Create `.claude/commands/generate-chapter-outline.md` — Agent Skill that reads constitution to confirm topic scope, generates Markdown chapter outline with H2 sections matching weekly breakdown, 3-5 bullet sub-topics per section, one code example placeholder, one learning objective per section tied to the 6 course outcomes — `.claude/commands/generate-chapter-outline.md`
-- [ ] T064 Create `.claude/agents/qdrant-indexer.md` — Subagent definition that instructs Claude to run `python backend/subagents/index_to_qdrant.py` after any chapter MDX is created/updated, confirms output ("Indexed N chunks across M chapters"), reports any failed chapter_id — `.claude/agents/qdrant-indexer.md`
-- [ ] T065 Add "Reusable Intelligence" section to `README.md` describing both artifacts: what each does, how to invoke, expected output — `README.md`
+- [X] T063 Create `.claude/commands/generate-chapter-outline.md` — Agent Skill that reads constitution to confirm topic scope, generates Markdown chapter outline with H2 sections matching weekly breakdown, 3-5 bullet sub-topics per section, one code example placeholder, one learning objective per section tied to the 6 course outcomes — `.claude/commands/generate-chapter-outline.md`
+- [X] T064 Create `.claude/agents/qdrant-indexer.md` — Subagent definition that instructs Claude to run `python backend/subagents/index_to_qdrant.py` after any chapter MDX is created/updated, confirms output ("Indexed N chunks across M chapters"), reports any failed chapter_id — `.claude/agents/qdrant-indexer.md`
+- [X] T065 Add "Reusable Intelligence" section to `README.md` describing both artifacts: what each does, how to invoke, expected output — `README.md`
 
 **Checkpoint**: Both files committed. README section complete. +50 pts claimable after demo video shows both.
 
