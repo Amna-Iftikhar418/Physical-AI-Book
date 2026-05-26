@@ -1,21 +1,34 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from config import CORS_ORIGINS
 from routers.health import router as health_router, set_startup_error
 
-_chat_err: str | None = None
+_startup_err: str | None = None
+chat_router = None  # type: ignore[assignment]
+
 try:
-    from routers.chat import router as chat_router
-except Exception as exc:
+    from config import CORS_ORIGINS, MISSING_VARS
+except Exception:
     import traceback
-    _chat_err = traceback.format_exc()
-    chat_router = None  # type: ignore[assignment]
+    _startup_err = traceback.format_exc()
+    CORS_ORIGINS = ["*"]
+    MISSING_VARS = []
 
-if _chat_err:
-    set_startup_error(_chat_err)
+if not _startup_err and MISSING_VARS:
+    _startup_err = "Missing required environment variables: " + ", ".join(MISSING_VARS)
 
-app = FastAPI(title="Physical AI Textbook API", version="1.0.2")
+if not _startup_err:
+    try:
+        from routers.chat import router as chat_router  # type: ignore[assignment]
+    except Exception:
+        import traceback
+        _startup_err = traceback.format_exc()
+        chat_router = None  # type: ignore[assignment]
+
+if _startup_err:
+    set_startup_error(_startup_err)
+
+app = FastAPI(title="Physical AI Textbook API", version="1.0.3")
 
 app.add_middleware(
     CORSMiddleware,
