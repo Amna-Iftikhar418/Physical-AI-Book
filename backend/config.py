@@ -21,4 +21,11 @@ QDRANT_API_KEY: str = os.getenv("QDRANT_API_KEY", "")
 DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 BETTER_AUTH_SECRET: str = os.getenv("BETTER_AUTH_SECRET", "")
 BETTER_AUTH_BASE_URL: str = os.getenv("BETTER_AUTH_BASE_URL", "http://localhost:3000")
-CORS_ORIGINS: list[str] = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+# Normalize to lowercase: browsers send the origin host lowercased
+# (GitHub Pages serves amna-iftikhar418.github.io), and Starlette matches
+# allow_origins case-sensitively — so a mixed-case env value would never match.
+CORS_ORIGINS: list[str] = [
+    o.strip().lower()
+    for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+    if o.strip()
+]
