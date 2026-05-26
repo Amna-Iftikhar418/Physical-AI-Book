@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
-from backend.config import DATABASE_URL
+from config import DATABASE_URL
 
 # Neon requires sslmode in the URL; asyncpg scheme handles it
 _async_url = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
