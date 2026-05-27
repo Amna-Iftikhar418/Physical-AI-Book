@@ -1151,7 +1151,7 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
    all footer rendering — no CSS overrides needed here.
 ═══════════════════════════════════════════════════════════ */
 
-body:has(.theme-doc-sidebar-container) footer {
+body:has(.theme-doc-sidebar-container) .footer-main-grid {
   display: none;
 }
 

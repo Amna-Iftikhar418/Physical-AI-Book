@@ -43,7 +43,7 @@ export default function Footer(): React.ReactElement {
       }} />
 
       {/* ── main content ── */}
-      <div style={{
+      <div className="footer-main-grid" style={{
         maxWidth: '1100px',
         margin: '0 auto',
         padding: '3.5rem 2rem 0',
