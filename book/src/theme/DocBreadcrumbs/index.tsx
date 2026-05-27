@@ -8,7 +8,7 @@ export default function DocBreadcrumbs(props: Record<string, unknown>): React.Re
   const ctx = useDocOverride();
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: '32px', marginBottom: '0.75rem' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: '32px', marginBottom: '0.8rem' }}>
       <OriginalDocBreadcrumbs {...props} />
       {ctx && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0, paddingLeft: '0.75rem' }}>
