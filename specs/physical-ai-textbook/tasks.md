@@ -142,7 +142,8 @@
 - [X] T059 [US2] Create `book/src/components/ChatWidget/SelectionButton.tsx` — renders floating "Ask about this" button positioned via `getBoundingClientRect()` of selection; hidden by default; triggers `ChatPanel` pre-fill with selected text + `chapter_id` extracted from current page path — `book/src/components/ChatWidget/SelectionButton.tsx`
 - [X] T060 [US2] Extend `book/src/theme/Root.tsx` — add `mouseup` event listener: if `window.getSelection().toString().trim().length >= 10` show `SelectionButton` near selection rect; else hide it — `book/src/theme/Root.tsx`
 - [X] T061 [US2] Wire `SelectionButton` click → opens `ChatPanel` with `selected_text` pre-filled in input and `chapter_id` stored for the `/api/chat/select` call — `book/src/components/ChatWidget/SelectionButton.tsx`, `book/src/components/ChatWidget/ChatPanel.tsx`
-- [ ] T062 [US2] Deploy and verify text-selection gate at live URL: highlight text → button appears within 200ms → chat opens pre-filled → response is chapter-scoped
+- [ ] 
+ [US2] Deploy and verify text-selection gate at live URL: highlight text → button appears within 200ms → chat opens pre-filled → response is chapter-scoped
 
 **Checkpoint**: US1 + US2 fully verified at live URL. P1 base gate complete.
 
@@ -182,18 +183,18 @@
 
 ### 6.2 — Auth Backend
 
-- [X] T069 [US3] Implement `backend/auth.py` — password hashing with `passlib[bcrypt]`, JWT creation/validation using `python-jose`, `create_access_token(user_id)`, `verify_token(token) → user_id`, token expiry 24 hours — `backend/auth.py`; add `passlib[bcrypt]`, `python-jose[cryptography]` to `backend/requirements.txt`
+- [X] T069 [US3] Implement `backend/auth.py` — password hashing with `bcrypt` directly (no passlib), JWT creation/validation using `python-jose`, `create_access_token(user_id)`, `verify_token(token) → user_id`, token expiry 24 hours — `backend/auth.py`; `bcrypt`, `python-jose[cryptography]` in `backend/requirements.txt`
 - [X] T070 [US3] Implement `POST /api/auth/signup` in `backend/routers/auth.py` — validates all 5 profile fields (required), hashes password, inserts into `users` + `user_profiles`, returns `{user_id, token}`; 409 on duplicate email; 422 if any profile field missing — `backend/routers/auth.py`
 - [X] T071 [US3] Implement `POST /api/auth/signin` in `backend/routers/auth.py` — verifies email + password hash, returns `{user_id, token}`; 401 on invalid credentials — `backend/routers/auth.py`
 - [X] T072 [US3] Implement `GET /api/auth/session` in `backend/routers/auth.py` — validates Bearer token, returns `{user_id, email}`; 401 on invalid/expired — `backend/routers/auth.py`
 - [X] T073 [US3] Implement `GET /api/user/profile` in `backend/routers/auth.py` — validates Bearer token, returns `{user_id, email, profile: {5 fields}}`; 401 if not authenticated — `backend/routers/auth.py`
 - [X] T074 [US3] Register auth router in `backend/main.py` — `backend/main.py`
-- [ ] T075 [US3] Add `BETTER_AUTH_SECRET` and `JWT_SECRET_KEY` to Railway/Render env vars dashboard
+- [X] T075 [US3] Add `BETTER_AUTH_SECRET` and `JWT_SECRET_KEY` to Railway/Render env vars dashboard
 
 ### 6.3 — Auth Frontend
 
-- [X] T076 [US3] Install `better-auth` in `book/` — create `book/src/lib/auth-client.ts` exporting `authClient = createAuthClient({ baseURL: process.env.REACT_APP_API_URL })` and `useSession()` hook — `book/src/lib/auth-client.ts`
-- [X] T077 [P] [US3] Create `book/src/components/Auth/AuthButton.tsx` — shows "Sign In / Sign Up" links when logged out; shows user email + "Sign Out" button when logged in; reads session from `authClient.useSession()` — `book/src/components/Auth/AuthButton.tsx`
+- [X] T076 [US3] Create `book/src/lib/auth-client.ts` — custom JWT auth client (better-auth Python adapter doesn't exist); exports `authClient` with `signUp()`, `signIn()`, `signOut()`, `getSession()`, `getCachedUser()`, `getToken()` — `book/src/lib/auth-client.ts`
+- [X] T077 [P] [US3] Create `book/src/components/Auth/AuthButton.tsx` — shows "Sign In / Sign Up" links when logged out; shows user email + "Sign Out" button when logged in; reads session from `authClient.getCachedUser()` + `authClient.getSession()` — `book/src/components/Auth/AuthButton.tsx`
 - [X] T078 [US3] Swizzle Docusaurus Navbar to render `AuthButton` — `book/src/theme/Navbar/Content/index.tsx`
 - [X] T079 [US3] Create `book/src/pages/signup.tsx` — form with email, password (min 8 chars), 5 required survey dropdowns (software_level, python_familiarity, linux_familiarity, hardware_background, ai_ml_familiarity); client-side validation requires all fields; on submit calls `POST /api/auth/signup`; on success stores token in localStorage and redirects to book homepage — `book/src/pages/signup.tsx`
 - [X] T080 [US3] Create `book/src/pages/signin.tsx` — form with email + password; on submit calls `POST /api/auth/signin`; stores token; redirects to homepage; shows error on 401 — `book/src/pages/signin.tsx`
