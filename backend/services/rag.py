@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import google.generativeai as genai
 from qdrant_client import QdrantClient
-from qdrant_client.models import FieldCondition, Filter, MatchValue
+from qdrant_client.models import FieldCondition, Filter, MatchValue, PayloadSchemaType
 
 from config import QDRANT_URL, QDRANT_API_KEY
 from services.agents import book_model
@@ -17,12 +17,24 @@ TOP_K = 5
 SCORE_THRESHOLD = 0.70
 
 _qdrant: QdrantClient | None = None
+_index_ensured = False
 
 
 def _get_qdrant() -> QdrantClient:
-    global _qdrant
+    global _qdrant, _index_ensured
     if _qdrant is None:
         _qdrant = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
+    if not _index_ensured:
+        for field in ("chapter_id", "module_id"):
+            try:
+                _qdrant.create_payload_index(
+                    collection_name=COLLECTION_NAME,
+                    field_name=field,
+                    field_schema=PayloadSchemaType.KEYWORD,
+                )
+            except Exception:
+                pass
+        _index_ensured = True
     return _qdrant
 
 

@@ -17,6 +17,7 @@ import google.generativeai as genai
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
+    PayloadSchemaType,
     PointStruct,
     VectorParams,
 )
@@ -83,6 +84,16 @@ def setup_collection(client: QdrantClient) -> None:
     client.create_collection(
         collection_name=COLLECTION_NAME,
         vectors_config=VectorParams(size=EMBEDDING_DIMS, distance=Distance.COSINE),
+    )
+    client.create_payload_index(
+        collection_name=COLLECTION_NAME,
+        field_name="chapter_id",
+        field_schema=PayloadSchemaType.KEYWORD,
+    )
+    client.create_payload_index(
+        collection_name=COLLECTION_NAME,
+        field_name="module_id",
+        field_schema=PayloadSchemaType.KEYWORD,
     )
     print(f"Collection '{COLLECTION_NAME}' created (size={EMBEDDING_DIMS}, COSINE)")
 
