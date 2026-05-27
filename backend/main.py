@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -40,7 +42,24 @@ if _startup_err:
     print("STARTUP ERROR:", _startup_err)
     set_startup_error(_startup_err)
 
-app = FastAPI(title="Physical AI Textbook API", version="1.0.3")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        from db.connection import engine
+        from db import models as _models  # noqa: F401 — registers all models with Base.metadata
+        from db.connection import Base
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("DB tables verified/created OK")
+    except Exception as exc:
+        print("STARTUP TABLE CREATION ERROR:", exc)
+    routes = [f"{m} {r.path}" for r in app.routes for m in getattr(r, "methods", [])]
+    print("REGISTERED ROUTES:", routes)
+    yield
+
+
+app = FastAPI(title="Physical AI Textbook API", version="1.0.3", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
