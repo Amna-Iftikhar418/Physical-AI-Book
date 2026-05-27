@@ -46,6 +46,15 @@ if _startup_err:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    try:
+        import db.models  # noqa: F401 — registers models on Base.metadata
+        from db.connection import engine, Base
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("DB tables created/verified OK")
+    except Exception:
+        import traceback
+        print("DB init warning (non-fatal):", traceback.format_exc())
     routes = [f"{m} {r.path}" for r in app.routes for m in getattr(r, "methods", [])]
     print("REGISTERED ROUTES:", routes)
     yield
