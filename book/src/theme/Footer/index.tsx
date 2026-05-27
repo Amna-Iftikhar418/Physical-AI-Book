@@ -160,15 +160,6 @@ export default function Footer(): React.ReactElement {
               Amna Iftikhar
             </span>
           </a>
-          <div style={{
-            marginTop: '1rem',
-            fontFamily: "'Outfit', sans-serif",
-            fontSize: '0.7rem',
-            color: '#35354a',
-            letterSpacing: '0.04em',
-          }}>
-            Panaversity Hackathon I
-          </div>
         </div>
       </div>
 
