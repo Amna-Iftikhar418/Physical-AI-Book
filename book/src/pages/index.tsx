@@ -55,7 +55,7 @@ function NeuralCanvas(): JSX.Element {
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.strokeStyle = `rgba(232, 160, 32, ${opacity})`;
+            ctx.strokeStyle = `rgba(91, 154, 255, ${opacity})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -65,7 +65,7 @@ function NeuralCanvas(): JSX.Element {
       for (const n of nodes) {
         ctx.beginPath();
         ctx.arc(n.x, n.y, 1.5, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(232, 160, 32, 0.5)';
+        ctx.fillStyle = 'rgba(91, 154, 255, 0.5)';
         ctx.fill();
       }
 

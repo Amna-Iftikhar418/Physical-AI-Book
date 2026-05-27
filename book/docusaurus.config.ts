@@ -52,7 +52,8 @@ const config: Config = {
   themeConfig: {
     image: 'img/docusaurus-social-card.jpg',
     colorMode: {
-      respectPrefersColorScheme: true,
+      defaultMode: 'dark',
+      disableSwitch: false,
     },
     navbar: {
       title: 'Physical AI & Humanoid Robotics',
@@ -94,8 +95,14 @@ const config: Config = {
             {label: 'Assessments', to: '/assessments'},
           ],
         },
+        {
+          title: 'Author',
+          items: [
+            {label: 'Amna Iftikhar', href: 'https://github.com/Amna-Iftikhar418'},
+          ],
+        },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Panaversity. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Amna Iftikhar. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

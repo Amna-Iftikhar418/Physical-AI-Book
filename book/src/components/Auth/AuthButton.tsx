@@ -2,6 +2,49 @@ import React, { useEffect, useState } from 'react';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { authClient, UserSession } from '../../lib/auth-client';
 
+const pill: React.CSSProperties = {
+  fontFamily: "'Outfit', sans-serif",
+  fontSize: '0.78rem',
+  fontWeight: 500,
+  letterSpacing: '0.06em',
+  color: '#7a7a90',
+  background: 'transparent',
+  border: '1px solid rgba(91, 154, 255, 0.25)',
+  borderRadius: '3px',
+  padding: '0.28rem 0.85rem',
+  cursor: 'pointer',
+  textDecoration: 'none',
+  display: 'inline-block',
+  lineHeight: '1.4',
+  transition: 'color 0.18s, border-color 0.18s, background 0.18s',
+  whiteSpace: 'nowrap',
+};
+
+const emailText: React.CSSProperties = {
+  fontFamily: "'Outfit', sans-serif",
+  fontSize: '0.78rem',
+  letterSpacing: '0.02em',
+  color: '#5b5b7a',
+  maxWidth: '130px',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const hoverIn = (e: React.MouseEvent<HTMLElement>) => {
+  const el = e.currentTarget as HTMLElement;
+  el.style.color = '#5b9aff';
+  el.style.borderColor = 'rgba(91,154,255,0.6)';
+  el.style.background = 'rgba(91,154,255,0.06)';
+};
+
+const hoverOut = (e: React.MouseEvent<HTMLElement>) => {
+  const el = e.currentTarget as HTMLElement;
+  el.style.color = '#7a7a90';
+  el.style.borderColor = 'rgba(91,154,255,0.25)';
+  el.style.background = 'transparent';
+};
+
 export function AuthButton(): React.ReactElement {
   const signinUrl = useBaseUrl('/signin');
   const signupUrl = useBaseUrl('/signup');
@@ -11,65 +54,38 @@ export function AuthButton(): React.ReactElement {
 
   useEffect(() => {
     const cached = authClient.getCachedUser();
-    if (cached) {
-      setSession(cached);
-      setLoading(false);
-    }
-    authClient.getSession().then((s) => {
-      setSession(s);
-      setLoading(false);
-    });
+    if (cached) { setSession(cached); setLoading(false); }
+    authClient.getSession().then((s) => { setSession(s); setLoading(false); });
   }, []);
 
-  if (loading) return <span style={{ fontSize: 14, opacity: 0.7 }}>...</span>;
+  if (loading) return <span style={{ ...emailText, opacity: 0.3, marginLeft: '0.5rem' }}>···</span>;
 
   if (session) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 13, opacity: 0.9 }}>{session.email}</span>
+      <>
+        <span style={{ ...emailText, marginLeft: '0.25rem' }} title={session.email}>
+          {session.email}
+        </span>
         <button
-          onClick={() => {
-            authClient.signOut();
-            setSession(null);
-            window.location.href = homeUrl;
-          }}
-          style={{
-            fontSize: 13,
-            padding: '4px 10px',
-            borderRadius: 4,
-            border: '1px solid currentColor',
-            background: 'transparent',
-            cursor: 'pointer',
-            color: 'inherit',
-          }}
+          style={pill}
+          onClick={() => { authClient.signOut(); setSession(null); window.location.href = homeUrl; }}
+          onMouseEnter={hoverIn}
+          onMouseLeave={hoverOut}
         >
           Sign Out
         </button>
-      </div>
+      </>
     );
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <a
-        href={signinUrl}
-        style={{ fontSize: 13, textDecoration: 'none', color: 'inherit', opacity: 0.9 }}
-      >
+    <>
+      <a href={signinUrl} style={pill} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
         Sign In
       </a>
-      <a
-        href={signupUrl}
-        style={{
-          fontSize: 13,
-          padding: '4px 10px',
-          borderRadius: 4,
-          border: '1px solid currentColor',
-          textDecoration: 'none',
-          color: 'inherit',
-        }}
-      >
+      <a href={signupUrl} style={pill} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
         Sign Up
       </a>
-    </div>
+    </>
   );
 }
