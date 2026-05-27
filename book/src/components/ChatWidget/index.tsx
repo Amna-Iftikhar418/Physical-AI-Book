@@ -7,191 +7,194 @@ export function ChatWidget() {
   return (
     <>
       <style>{`
-        /* ── FAB animations ─────────────────────────────── */
-        @keyframes fabBorderSpin {
+        /* ─── Keyframes ──────────────────────────────────────── */
+        @keyframes sonarPing {
+          0%   { transform: scale(1);   opacity: 0.6; }
+          100% { transform: scale(2.5); opacity: 0; }
+        }
+        @keyframes haloBorderSpin {
           to { transform: rotate(360deg); }
         }
-        @keyframes fabRing1 {
-          0%   { transform: scale(1); opacity: 0.55; }
-          100% { transform: scale(1.9); opacity: 0; }
+        @keyframes glowBreath {
+          0%, 100% {
+            box-shadow:
+              0 0 18px 4px  rgba(59,130,246,0.45),
+              0 0 50px 10px rgba(37,99,235,0.22),
+              0 8px 32px     rgba(0,0,0,0.55);
+          }
+          50% {
+            box-shadow:
+              0 0 28px 8px  rgba(59,130,246,0.65),
+              0 0 70px 18px rgba(37,99,235,0.32),
+              0 12px 40px   rgba(0,0,0,0.6);
+          }
         }
-        @keyframes fabRing2 {
-          0%   { transform: scale(1); opacity: 0.35; }
-          100% { transform: scale(2.4); opacity: 0; }
+        @keyframes iconFloat {
+          0%, 100% { transform: translateY(0) scale(1); }
+          45%      { transform: translateY(-4px) scale(1.06); }
+          75%      { transform: translateY(1px) scale(0.97); }
         }
-        @keyframes fabLabelIn {
-          from { opacity: 0; transform: translateX(6px); max-width: 0; }
-          to   { opacity: 1; transform: translateX(0);   max-width: 90px; }
+        @keyframes typingDot {
+          0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+          30%           { transform: translateY(-3px); opacity: 1; }
         }
-        @keyframes fabIconBounce {
-          0%, 100% { transform: translateY(0); }
-          40%      { transform: translateY(-3px); }
-          70%      { transform: translateY(1px); }
+        @keyframes closeRotate {
+          from { transform: rotate(-45deg) scale(0.7); opacity: 0; }
+          to   { transform: rotate(0deg)  scale(1);   opacity: 1; }
         }
-        @keyframes sparkle {
-          0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
-          50%      { opacity: 0.6; transform: scale(1.3) rotate(180deg); }
-        }
-
-        /* ── wrapper: gradient border ───────────────────── */
-        .fab-border-wrap {
-          position: fixed;
-          bottom: 22px;
-          right: 22px;
-          z-index: 9998;
-          padding: 2px;
-          border-radius: 30px;
-          background: linear-gradient(135deg, #1d4ed8, #5b9aff, #93c5fd, #fbbf24, #5b9aff, #1d4ed8);
-          background-size: 300% 300%;
-          transition: border-radius 0.4s cubic-bezier(0.34,1.56,0.64,1), padding 0.3s;
-          filter: drop-shadow(0 8px 24px rgba(37,99,235,0.55));
-        }
-        .fab-border-wrap.is-open {
-          border-radius: 50%;
-          padding: 1.5px;
-          background: linear-gradient(135deg, rgba(91,154,255,0.4), rgba(91,154,255,0.15));
-          filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5));
+        @keyframes onlinePulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+          50%      { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
         }
 
-        /* spinning gradient overlay when closed */
-        .fab-spin-ring {
-          position: absolute;
-          inset: -60%;
-          border-radius: inherit;
-          background: conic-gradient(
-            from 0deg,
-            #1d4ed8 0%,
-            #5b9aff 25%,
-            #93c5fd 45%,
-            #fbbf24 55%,
-            #60a5fa 75%,
-            #1d4ed8 100%
-          );
-          animation: fabBorderSpin 4s linear infinite;
-          pointer-events: none;
-        }
-        .fab-spin-ring-mask {
-          position: absolute;
-          inset: 2px;
-          border-radius: inherit;
-          background: #0a0c16;
-          pointer-events: none;
-        }
-
-        /* pulse rings (only when closed) */
-        .fab-pulse-ring {
+        /* ─── Sonar ping rings ───────────────────────────────── */
+        .fab-sonar {
           position: absolute;
           inset: 0;
-          border-radius: inherit;
-          background: rgba(59,130,246,0.25);
+          border-radius: 50%;
+          border: 1.5px solid rgba(59,130,246,0.55);
           pointer-events: none;
         }
-        .fab-pulse-ring-1 { animation: fabRing1 2.4s ease-out infinite; }
-        .fab-pulse-ring-2 { animation: fabRing2 2.4s ease-out infinite 0.7s; }
+        .fab-sonar-1 { animation: sonarPing 2.6s ease-out infinite; }
+        .fab-sonar-2 { animation: sonarPing 2.6s ease-out infinite 0.9s; }
 
-        /* the actual button */
-        .fab-btn {
+        /* ─── Spinning gradient halo border ─────────────────── */
+        .fab-halo-wrap {
+          position: absolute;
+          inset: -3px;
+          border-radius: 50%;
+          padding: 3px;
+          animation: haloBorderSpin 6s linear infinite;
+          background: conic-gradient(
+            from 0deg,
+            #1e3a8a 0%,
+            #3b82f6 20%,
+            #93c5fd 38%,
+            #fbbf24 50%,
+            #93c5fd 62%,
+            #3b82f6 80%,
+            #1e3a8a 100%
+          );
+          pointer-events: none;
+        }
+        .fab-halo-inner {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: #080e1f;
+        }
+
+        /* ─── Main circle button ─────────────────────────────── */
+        .fab-circle-btn {
           position: relative;
-          z-index: 1;
-          height: 48px;
-          min-width: 48px;
-          border-radius: 28px;
-          background: linear-gradient(135deg, #0d1526 0%, #111827 100%);
+          z-index: 2;
+          width: 62px;
+          height: 62px;
+          border-radius: 50%;
+          background: linear-gradient(145deg, #0a1628 0%, #0e1f50 35%, #1a3680 65%, #1d4ed8 100%);
           border: none;
-          color: #fff;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-          padding: 0 16px 0 14px;
-          font-family: 'Outfit', 'Inter', sans-serif;
-          font-weight: 700;
-          font-size: 13.5px;
-          letter-spacing: 0.02em;
-          transition: background 0.25s, border-radius 0.4s cubic-bezier(0.34,1.56,0.64,1),
-                      min-width 0.35s cubic-bezier(0.34,1.56,0.64,1),
-                      padding 0.35s cubic-bezier(0.34,1.56,0.64,1),
-                      transform 0.18s;
-          overflow: hidden;
-          white-space: nowrap;
+          animation: glowBreath 3s ease-in-out infinite;
+          transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), background 0.3s;
+          overflow: visible;
         }
-        .fab-btn.is-open {
-          border-radius: 50%;
-          min-width: 48px;
-          padding: 0;
-          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        .fab-circle-btn:hover {
+          transform: scale(1.1);
         }
-        .fab-btn:hover { transform: scale(1.06); }
-        .fab-btn:active { transform: scale(0.97); }
+        .fab-circle-btn:active {
+          transform: scale(0.95);
+        }
+        .fab-circle-btn.is-open {
+          background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+          animation: none;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(91,154,255,0.2);
+        }
 
-        /* icon */
-        .fab-icon {
-          flex-shrink: 0;
+        /* ─── Chat bubble icon wrapper ───────────────────────── */
+        .fab-icon-wrap {
           display: flex;
+          flex-direction: column;
           align-items: center;
-          transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+          justify-content: center;
         }
-        .fab-btn:not(.is-open) .fab-icon {
-          animation: fabIconBounce 3s ease-in-out infinite;
-        }
-        .fab-btn.is-open .fab-icon {
-          transform: rotate(90deg) scale(0.9);
+        .fab-circle-btn:not(.is-open) .fab-icon-wrap {
+          animation: iconFloat 3.2s ease-in-out infinite;
         }
 
-        /* label */
-        .fab-label {
-          display: inline-flex;
-          align-items: center;
-          gap: 5px;
-          overflow: hidden;
-          max-width: 90px;
-          animation: fabLabelIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
-          color: #e2e8f0;
+        /* ─── Typing dots inside bubble ──────────────────────── */
+        .fab-dot-row {
+          display: flex;
+          gap: 3px;
+          margin-top: -1px;
         }
-        .fab-sparkle {
-          font-size: 11px;
-          animation: sparkle 2.5s ease-in-out infinite;
-          line-height: 1;
+        .fab-typing-dot {
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+          background: #1d4ed8;
+        }
+        .fab-typing-dot:nth-child(1) { animation: typingDot 1.3s ease-in-out 0.0s infinite; }
+        .fab-typing-dot:nth-child(2) { animation: typingDot 1.3s ease-in-out 0.18s infinite; }
+        .fab-typing-dot:nth-child(3) { animation: typingDot 1.3s ease-in-out 0.36s infinite; }
+
+        /* ─── Close icon ─────────────────────────────────────── */
+        .fab-close-icon {
+          animation: closeRotate 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards;
         }
 
-        /* online dot */
-        .fab-online {
+        /* ─── Online status dot ──────────────────────────────── */
+        .fab-online-dot {
           position: absolute;
-          top: 7px;
-          right: 7px;
-          width: 8px;
-          height: 8px;
+          top: 5px;
+          right: 5px;
+          width: 10px;
+          height: 10px;
           background: #22c55e;
           border-radius: 50%;
-          border: 1.5px solid #111827;
-          z-index: 2;
+          border: 2px solid #080e1f;
+          animation: onlinePulse 2s ease-in-out infinite;
+          z-index: 3;
           transition: opacity 0.2s;
         }
-        .fab-btn.is-open .fab-online { opacity: 0; }
 
-        /* tooltip */
-        .fab-border-wrap:not(.is-open):hover .fab-tooltip {
+        /* ─── Tooltip ────────────────────────────────────────── */
+        .fab-container:not(.is-open):hover .fab-tooltip {
           opacity: 1;
-          transform: translateX(0);
+          transform: translateY(-50%) translateX(0);
           pointer-events: auto;
         }
         .fab-tooltip {
           position: absolute;
-          right: calc(100% + 10px);
+          right: calc(100% + 14px);
           top: 50%;
-          transform: translateY(-50%) translateX(6px);
-          background: rgba(10,12,22,0.95);
-          border: 1px solid rgba(91,154,255,0.2);
-          border-radius: 8px;
-          padding: 5px 10px;
-          font-size: 11.5px;
-          color: #94a3b8;
+          transform: translateY(-50%) translateX(8px);
+          background: rgba(8,14,31,0.96);
+          border: 1px solid rgba(59,130,246,0.25);
+          border-radius: 10px;
+          padding: 7px 13px;
           white-space: nowrap;
           opacity: 0;
           pointer-events: none;
-          transition: opacity 0.2s, transform 0.2s;
+          transition: opacity 0.22s, transform 0.22s;
           font-family: 'Outfit', sans-serif;
+          font-size: 12px;
+          color: #cbd5e1;
+          letter-spacing: 0.01em;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        .fab-tooltip-title {
+          font-weight: 600;
+          color: #e2e8f0;
+          display: block;
+          margin-bottom: 1px;
+        }
+        .fab-tooltip-sub {
+          font-size: 10.5px;
+          color: #64748b;
+          display: block;
         }
         .fab-tooltip::after {
           content: '';
@@ -199,61 +202,100 @@ export function ChatWidget() {
           left: 100%;
           top: 50%;
           transform: translateY(-50%);
-          border: 5px solid transparent;
-          border-left-color: rgba(91,154,255,0.2);
+          border: 6px solid transparent;
+          border-left-color: rgba(59,130,246,0.25);
+        }
+
+        /* ─── Container ──────────────────────────────────────── */
+        .fab-container {
+          position: fixed;
+          bottom: 26px;
+          right: 26px;
+          z-index: 9998;
+          width: 62px;
+          height: 62px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
       `}</style>
 
-      <div className={`fab-border-wrap${open ? ' is-open' : ''}`}>
+      <div className={`fab-container${open ? ' is-open' : ''}`}>
 
-        {/* Spinning gradient border ring (only when closed) */}
+        {/* Sonar ping rings — only when closed */}
         {!open && (
           <>
-            <div className="fab-spin-ring" />
-            <div className="fab-spin-ring-mask" />
-            <div className="fab-pulse-ring fab-pulse-ring-1" />
-            <div className="fab-pulse-ring fab-pulse-ring-2" />
+            <div className="fab-sonar fab-sonar-1" />
+            <div className="fab-sonar fab-sonar-2" />
           </>
+        )}
+
+        {/* Spinning gradient halo border — only when closed */}
+        {!open && (
+          <div className="fab-halo-wrap">
+            <div className="fab-halo-inner" />
+          </div>
         )}
 
         {/* Tooltip */}
         {!open && (
-          <span className="fab-tooltip">Ask the Physical AI textbook</span>
+          <span className="fab-tooltip">
+            <span className="fab-tooltip-title">Ask Physical AI</span>
+            <span className="fab-tooltip-sub">RAG-powered textbook assistant</span>
+          </span>
         )}
 
+        {/* Main button */}
         <button
-          className={`fab-btn${open ? ' is-open' : ''}`}
+          className={`fab-circle-btn${open ? ' is-open' : ''}`}
           onClick={() => setOpen(o => !o)}
           aria-label={open ? 'Close chat' : 'Ask the Physical AI textbook'}
         >
-          {/* Online status dot */}
-          <span className="fab-online" />
+          {/* Online dot */}
+          {!open && <span className="fab-online-dot" />}
 
-          {/* Icon */}
-          <span className="fab-icon">
-            {open ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          {open ? (
+            /* Close icon */
+            <span className="fab-close-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="#94a3b8" strokeWidth="2.2" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
-            ) : (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="7" width="18" height="13" rx="3" stroke="#93c5fd" strokeWidth="1.7"/>
-                <circle cx="9" cy="13.5" r="1.5" fill="#fff"/>
-                <circle cx="15" cy="13.5" r="1.5" fill="#fff"/>
-                <path d="M12 2.5v4.5" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" strokeLinecap="round"/>
-                <rect x="9.5" y="1.5" width="5" height="2.2" rx="1.1" fill="rgba(255,255,255,0.6)"/>
-                <circle cx="9" cy="13.5" r="0.6" fill="#93c5fd"/>
-                <circle cx="15" cy="13.5" r="0.6" fill="#93c5fd"/>
-              </svg>
-            )}
-          </span>
-
-          {/* Label — only when closed */}
-          {!open && (
-            <span className="fab-label">
-              Ask AI
-              <span className="fab-sparkle">✦</span>
             </span>
+          ) : (
+            /* Chat bubble icon with typing dots */
+            <div className="fab-icon-wrap">
+              <svg width="30" height="28" viewBox="0 0 32 30" fill="none">
+                {/* Shadow/depth layer */}
+                <path
+                  d="M3 2h26a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H11.5L4 30V4a2 2 0 0 1 2-2z"
+                  fill="rgba(30,58,138,0.35)"
+                  transform="translate(0.5, 1)"
+                />
+                {/* Main bubble */}
+                <path
+                  d="M3 2h26a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H11.5L4 30V4a2 2 0 0 1 2-2z"
+                  fill="white"
+                  opacity="0.97"
+                />
+                {/* Inner shine */}
+                <path
+                  d="M6 3h20a1 1 0 0 1 1 1v6H5V4a1 1 0 0 1 1-1z"
+                  fill="rgba(255,255,255,0.4)"
+                />
+                {/* Dots row */}
+                <circle cx="11" cy="13" r="2.2" fill="#1d4ed8"/>
+                <circle cx="16" cy="13" r="2.2" fill="#1d4ed8"/>
+                <circle cx="21" cy="13" r="2.2" fill="#1d4ed8"/>
+              </svg>
+              {/* Animated typing dots overlaid */}
+              <div className="fab-dot-row" style={{ position: 'absolute', top: 17, left: '50%', transform: 'translateX(-50%)', gap: 4 }}>
+                <div className="fab-typing-dot" />
+                <div className="fab-typing-dot" />
+                <div className="fab-typing-dot" />
+              </div>
+            </div>
           )}
         </button>
       </div>
