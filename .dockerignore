@@ -1,0 +1,12 @@
+book/
+.github/
+.specify/
+specs/
+history/
+.claude/
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+*.md
+.env
+.gitignore
