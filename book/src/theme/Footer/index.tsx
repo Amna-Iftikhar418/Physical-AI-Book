@@ -72,7 +72,7 @@ export default function Footer(): React.ReactElement {
           <p style={{
             fontFamily: "'Outfit', sans-serif",
             fontSize: '0.78rem',
-            color: '#4a4a6a',
+            color: '#9898b8',
             lineHeight: 1.7,
             margin: '0 0 1.25rem',
             maxWidth: '220px',
@@ -91,8 +91,8 @@ export default function Footer(): React.ReactElement {
               fontSize: '0.73rem',
               fontWeight: 600,
               letterSpacing: '0.06em',
-              color: '#7a7a9a',
-              border: '1px solid rgba(91,154,255,0.2)',
+              color: '#b0b0cc',
+              border: '1px solid rgba(91,154,255,0.35)',
               borderRadius: '4px',
               padding: '0.3rem 0.75rem',
               textDecoration: 'none',
@@ -100,12 +100,12 @@ export default function Footer(): React.ReactElement {
             }}
             onMouseEnter={e => {
               (e.currentTarget as HTMLElement).style.color = '#c8d8ff';
-              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(91,154,255,0.5)';
-              (e.currentTarget as HTMLElement).style.background = 'rgba(91,154,255,0.06)';
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(91,154,255,0.65)';
+              (e.currentTarget as HTMLElement).style.background = 'rgba(91,154,255,0.08)';
             }}
             onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.color = '#7a7a9a';
-              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(91,154,255,0.2)';
+              (e.currentTarget as HTMLElement).style.color = '#b0b0cc';
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(91,154,255,0.35)';
               (e.currentTarget as HTMLElement).style.background = 'transparent';
             }}
           >
@@ -151,11 +151,11 @@ export default function Footer(): React.ReactElement {
             <span style={{
               fontFamily: "'Outfit', sans-serif",
               fontSize: '0.82rem',
-              color: '#9090b8',
+              color: '#c0c0dc',
               transition: 'color 0.18s',
             }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#c8d0f0'}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#9090b8'}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#e8eeff'}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#c0c0dc'}
             >
               Amna Iftikhar
             </span>
@@ -168,7 +168,7 @@ export default function Footer(): React.ReactElement {
         maxWidth: '1100px',
         margin: '2.5rem auto 0',
         padding: '1rem 2rem',
-        borderTop: '1px solid rgba(91,154,255,0.07)',
+        borderTop: '1px solid rgba(91,154,255,0.18)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -178,7 +178,7 @@ export default function Footer(): React.ReactElement {
         <span style={{
           fontFamily: "'Outfit', sans-serif",
           fontSize: '0.68rem',
-          color: '#404058',
+          color: '#8888aa',
           letterSpacing: '0.06em',
         }}>
           © {YEAR} Amna Iftikhar — All rights reserved
@@ -186,7 +186,7 @@ export default function Footer(): React.ReactElement {
         <span style={{
           fontFamily: "'Outfit', sans-serif",
           fontSize: '0.68rem',
-          color: '#2e2e48',
+          color: '#686888',
           letterSpacing: '0.04em',
         }}>
           Built with Docusaurus · Powered by Gemini + Qdrant
@@ -227,7 +227,7 @@ function FooterCol({ title, links }: { title: string; links: { label: string; to
             style={{
               fontFamily: "'Outfit', sans-serif",
               fontSize: '0.8rem',
-              color: '#9090b8',
+              color: '#b8b8d8',
               textDecoration: 'none',
               letterSpacing: '0.02em',
               lineHeight: 1.5,
@@ -235,11 +235,11 @@ function FooterCol({ title, links }: { title: string; links: { label: string; to
               display: 'inline-block',
             }}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.color = '#c8d0f0';
+              (e.currentTarget as HTMLElement).style.color = '#e8eeff';
               (e.currentTarget as HTMLElement).style.paddingLeft = '4px';
             }}
             onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.color = '#9090b8';
+              (e.currentTarget as HTMLElement).style.color = '#b8b8d8';
               (e.currentTarget as HTMLElement).style.paddingLeft = '0';
             }}
           >
