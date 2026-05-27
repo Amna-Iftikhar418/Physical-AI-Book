@@ -49,15 +49,7 @@ export default function Footer(): React.ReactElement {
       }} />
 
       {/* ── main content — hidden on doc pages ── */}
-      {!isDocPage && <div style={{
-        maxWidth: '1100px',
-        margin: '0 auto',
-        padding: '3.5rem 2rem 0',
-        display: 'grid',
-        gridTemplateColumns: '1.6fr 1fr 1fr 1fr',
-        gap: '2.5rem',
-        alignItems: 'start',
-      }}>
+      {!isDocPage && <div className="footerMainGrid">
 
         {/* Brand column */}
         <div>

@@ -663,3 +663,111 @@
     padding: 5rem 1.25rem;
   }
 }
+
+/* ── 480px: small phones ── */
+@media (max-width: 480px) {
+  .hero {
+    padding: 5rem 1.25rem 3.5rem;
+  }
+
+  .heroTitle {
+    font-size: 2.1rem;
+  }
+
+  .heroTagline {
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .heroCta {
+    padding: 0.75rem 1.75rem;
+    font-size: 0.82rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .heroSecondary {
+    font-size: 0.8rem;
+  }
+
+  .statItem {
+    padding: 1rem 1.5rem;
+  }
+
+  .statNumber {
+    font-size: 2.35rem;
+  }
+
+  .moduleCard {
+    padding: 1.75rem;
+  }
+
+  .featureCard {
+    padding: 1.5rem;
+  }
+
+  .sectionWrapper {
+    padding: 3.5rem 1rem;
+  }
+
+  .ctaSection {
+    padding: 4rem 1rem;
+  }
+
+  .ctaButton {
+    padding: 0.85rem 2rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* ── 375px: iPhone SE and similar ── */
+@media (max-width: 375px) {
+  .heroTitle {
+    font-size: 1.9rem;
+  }
+
+  .heroTagline {
+    font-size: 0.92rem;
+  }
+
+  .statNumber {
+    font-size: 2rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.65rem;
+  }
+
+  .sectionWrapper {
+    padding: 3rem 0.875rem;
+  }
+
+  .moduleCard {
+    padding: 1.5rem;
+  }
+}
+
+/* ── 320px: minimum supported width ── */
+@media (max-width: 320px) {
+  .heroTitle {
+    font-size: 1.75rem;
+    letter-spacing: -0.03em;
+  }
+
+  .hero {
+    padding: 4.5rem 1rem 3rem;
+  }
+
+  .statItem {
+    padding: 0.875rem 1.25rem;
+  }
+
+  .statNumber {
+    font-size: 1.85rem;
+  }
+
+  .techBadge {
+    font-size: 0.7rem;
+    padding: 0.35rem 0.85rem;
+  }
+}

@@ -74,6 +74,12 @@ export function ChatWidget() {
           justify-content: flex-end;
           gap: 12px;
         }
+        @media (max-width: 460px) {
+          .pai-fab-root {
+            bottom: 16px;
+            right: 16px;
+          }
+        }
 
         /* ─── Hover label ────────────────────────────────────── */
         .pai-fab-label {

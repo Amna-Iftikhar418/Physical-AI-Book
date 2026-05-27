@@ -169,7 +169,7 @@ export default function SignupPage(): React.ReactElement {
               <p style={progressLabel}>{filledSurvey}/{SURVEY_FIELDS.length} fields filled</p>
             </div>
 
-            <div style={surveyGrid}>
+            <div style={surveyGrid} className="signupSurveyGrid">
               {SURVEY_FIELDS.map((field) => {
                 const val = form[field.id as SurveyKey];
                 return (
@@ -429,8 +429,6 @@ const progressLabel: React.CSSProperties = {
 };
 
 const surveyGrid: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
   gap: '0.85rem',
 };
 

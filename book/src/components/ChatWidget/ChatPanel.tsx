@@ -131,9 +131,33 @@ export function ChatPanel({
         .chat-header-pulse { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; position: relative; }
         .chat-header-pulse::after { content: ''; position: absolute; inset: -2px; border-radius: 50%; background: rgba(34,197,94,0.3); animation: pulseRing 2s ease-out infinite; }
         @keyframes pulseRing { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+
+        /* ── Responsive chat panel ── */
+        .chat-panel {
+          position: fixed;
+          bottom: 88px;
+          right: 20px;
+          width: 390px;
+          height: 580px;
+        }
+        @media (max-width: 460px) {
+          .chat-panel {
+            width: calc(100vw - 1.5rem) !important;
+            height: calc(100vh - 6.5rem) !important;
+            max-height: 580px !important;
+            right: 0.75rem !important;
+            bottom: 5rem !important;
+          }
+        }
+        @media (max-width: 360px) {
+          .chat-panel {
+            width: calc(100vw - 1rem) !important;
+            right: 0.5rem !important;
+          }
+        }
       `}</style>
 
-      <div style={{
+      <div className="chat-panel" style={{
         position: 'fixed',
         bottom: 88,
         right: 20,
