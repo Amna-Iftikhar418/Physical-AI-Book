@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkbook=self.webpackChunkbook||[]).push([["452"],{5146(e,o,r){r.r(o),r.d(o,{default:()=>n});var t=r(4848),u=r(6347),k=r(6497);function n(){return(0,t.jsx)(u.rd,{to:(0,k.Ay)("/intro")})}}}]);
