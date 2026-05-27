@@ -198,7 +198,7 @@
 - [X] T078 [US3] Swizzle Docusaurus Navbar to render `AuthButton` — `book/src/theme/Navbar/Content/index.tsx`
 - [X] T079 [US3] Create `book/src/pages/signup.tsx` — form with email, password (min 8 chars), 5 required survey dropdowns (software_level, python_familiarity, linux_familiarity, hardware_background, ai_ml_familiarity); client-side validation requires all fields; on submit calls `POST /api/auth/signup`; on success stores token in localStorage and redirects to book homepage — `book/src/pages/signup.tsx`
 - [X] T080 [US3] Create `book/src/pages/signin.tsx` — form with email + password; on submit calls `POST /api/auth/signin`; stores token; redirects to homepage; shows error on 401 — `book/src/pages/signin.tsx`
-- [ ] T081 [US3] Deploy and verify P3 gate at live URL: signup with all 5 fields → profile in Neon → signin → session persists on refresh → navbar shows email → duplicate email returns error
+- [X] T081 [US3] Deploy and verify P3 gate at live URL: signup with all 5 fields → profile in Neon → signin → session persists on refresh → navbar shows email → duplicate email returns error
 
 **Checkpoint**: Auth fully verified. +50 pts claimable. Phase 7 and 8 can now begin.
 
@@ -214,12 +214,12 @@
 
 **Dependency**: Phase 6 (auth) must be deployed and verified.
 
-- [ ] T082 [US4] Add `personalization_model = genai.GenerativeModel(model_name="gemini-2.0-flash", system_instruction=PERSONALIZATION_SYSTEM_PROMPT)` to `backend/services/agents.py` — system prompt instructs rewrite for user profile level, preserving all technical facts, code examples, and section headings — `backend/services/agents.py`
-- [ ] T083 [US4] Implement `backend/services/personalization.py` — `get_user_profile(user_id)` fetches from Neon, `personalize_chapter(chapter_id, profile)` reads from `docs_manifest.json`, calls `personalization_model.generate_content()` wrapped with `with_retry()` — `backend/services/personalization.py`
-- [ ] T084 [US4] Implement `POST /api/personalize` in `backend/routers/personalize.py` — requires Bearer token, calls personalization service, returns `{personalized_text}`; 401 if not authenticated; 404 if chapter_id not in manifest; 503 if LLM retries exhausted — `backend/routers/personalize.py`
-- [ ] T085 [US4] Register personalize router in `backend/main.py` — `backend/main.py`
-- [ ] T086 [US4] Create `book/src/components/PersonalizationBar/PersonalizeButton.tsx` — rendered at top of every chapter MDX page; visible only to authenticated users (checked via `authClient.useSession()`); on click: calls `POST /api/personalize` with `chapter_id` from current path, shows loading indicator ("Personalizing for your level…"), on response replaces page content with personalized Markdown rendered via `react-markdown`; "Back to original" link reloads the page — `book/src/components/PersonalizationBar/PersonalizeButton.tsx`
-- [ ] T087 [US4] Integrate `PersonalizeButton` into a shared MDX layout component so it renders at the top of every chapter page — `book/src/theme/DocItem/Layout/index.tsx` or `book/src/components/PersonalizationBar/index.tsx`
+- [X] T082 [US4] Add `personalization_model = genai.GenerativeModel(model_name="gemini-2.0-flash", system_instruction=PERSONALIZATION_SYSTEM_PROMPT)` to `backend/services/agents.py` — system prompt instructs rewrite for user profile level, preserving all technical facts, code examples, and section headings — `backend/services/agents.py`
+- [X] T083 [US4] Implement `backend/services/personalization.py` — `get_user_profile(user_id)` fetches from Neon, `personalize_chapter(chapter_id, profile)` reads from `docs_manifest.json`, calls `personalization_model.generate_content()` wrapped with `with_retry()` — `backend/services/personalization.py`
+- [X] T084 [US4] Implement `POST /api/personalize` in `backend/routers/personalize.py` — requires Bearer token, calls personalization service, returns `{personalized_text}`; 401 if not authenticated; 404 if chapter_id not in manifest; 503 if LLM retries exhausted — `backend/routers/personalize.py`
+- [X] T085 [US4] Register personalize router in `backend/main.py` — `backend/main.py`
+- [X] T086 [US4] Create `book/src/components/PersonalizationBar/PersonalizeButton.tsx` — rendered at top of every chapter MDX page; visible only to authenticated users (checked via `authClient.useSession()`); on click: calls `POST /api/personalize` with `chapter_id` from current path, shows loading indicator ("Personalizing for your level…"), on response replaces page content with personalized Markdown rendered via `react-markdown`; "Back to original" link reloads the page — `book/src/components/PersonalizationBar/PersonalizeButton.tsx`
+- [X] T087 [US4] Integrate `PersonalizeButton` into a shared MDX layout component so it renders at the top of every chapter page — `book/src/theme/DocItem/Layout/index.tsx` or `book/src/components/PersonalizationBar/index.tsx`
 - [ ] T088 [US4] Deploy and verify P4 gate at live URL: button hidden for anonymous → visible for logged-in → personalization returns within 30s → code blocks/technical terms intact → "Back to original" restores page
 
 **Checkpoint**: Personalization verified. +50 pts claimable.

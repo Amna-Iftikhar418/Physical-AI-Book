@@ -21,3 +21,19 @@ book_model = genai.GenerativeModel(
     model_name="gemini-2.5-flash",
     system_instruction=BOOK_SYSTEM_PROMPT,
 )
+
+PERSONALIZATION_SYSTEM_PROMPT = (
+    "You are an expert educator for the Physical AI & Humanoid Robotics textbook. "
+    "Rewrite the provided chapter content tailored to the student's skill level. "
+    "Rules: "
+    "1. Preserve ALL technical facts, code examples, equations, and section headings exactly. "
+    "2. For beginner students: add analogies, define technical terms inline, slow the pace. "
+    "3. For advanced students: be concise, skip basic definitions, add more technical depth. "
+    "4. Do not introduce technical content not present in the original chapter. "
+    "5. Return the complete rewritten chapter in Markdown format."
+)
+
+personalization_model = genai.GenerativeModel(
+    model_name="gemini-2.5-flash",
+    system_instruction=PERSONALIZATION_SYSTEM_PROMPT,
+)

@@ -39,6 +39,16 @@ except Exception:
     print("AUTH ROUTER LOAD ERROR:", traceback.format_exc())
     auth_router = None  # type: ignore[assignment]
 
+personalize_router = None  # type: ignore[assignment]
+
+try:
+    from routers.personalize import router as personalize_router  # type: ignore[assignment]
+    print("PERSONALIZE ROUTER LOADED OK")
+except Exception:
+    import traceback
+    print("PERSONALIZE ROUTER LOAD ERROR:", traceback.format_exc())
+    personalize_router = None  # type: ignore[assignment]
+
 # if _startup_err:
 #     set_startup_error(_startup_err)
 if _startup_err:
@@ -101,3 +111,5 @@ if chat_router is not None:
     app.include_router(chat_router)
 if auth_router is not None:
     app.include_router(auth_router)
+if personalize_router is not None:
+    app.include_router(personalize_router)
