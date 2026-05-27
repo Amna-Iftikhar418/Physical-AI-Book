@@ -25,7 +25,10 @@ if not _startup_err:
         _startup_err = traceback.format_exc()
         chat_router = None  # type: ignore[assignment]
 
+# if _startup_err:
+#     set_startup_error(_startup_err)
 if _startup_err:
+    print("STARTUP ERROR:", _startup_err)
     set_startup_error(_startup_err)
 
 app = FastAPI(title="Physical AI Textbook API", version="1.0.3")
