@@ -22,7 +22,7 @@ def set_cors_origins(origins: list[str]) -> None:
 async def health():
     resp: dict = {
         "status": "ok",
-        "version": "1.0.7",
+        "version": "1.0.8",
         "git_sha": os.environ.get("RAILWAY_GIT_COMMIT_SHA", "local")[:8],
         "cors_origins": _cors_origins,
     }

@@ -68,17 +68,24 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Physical AI Textbook API", version="1.0.7", lifespan=lifespan)
+app = FastAPI(title="Physical AI Textbook API", version="1.0.8", lifespan=lifespan)
 
 
-@app.exception_handler(Exception)
-async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    import traceback
-    print("UNHANDLED EXCEPTION:", traceback.format_exc())
-    return JSONResponse(
-        status_code=500,
-        content={"detail": f"{type(exc).__name__}: {exc}"},
-    )
+# MUST be registered BEFORE add_middleware(CORSMiddleware).
+# @app.exception_handler(Exception) goes to ServerErrorMiddleware (outermost, outside
+# CORS), so 500 responses never get Access-Control-Allow-Origin headers. This
+# middleware sits INSIDE CORS so error responses flow back through the CORS wrapper.
+@app.middleware("http")
+async def _catch_exceptions(request: Request, call_next):
+    try:
+        return await call_next(request)
+    except Exception as exc:
+        import traceback
+        print("UNHANDLED EXCEPTION:", traceback.format_exc())
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"{type(exc).__name__}: {exc}"},
+        )
 
 
 app.add_middleware(

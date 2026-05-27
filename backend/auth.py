@@ -1,3 +1,5 @@
+import base64
+import hashlib
 from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
@@ -8,15 +10,21 @@ from config import JWT_SECRET_KEY
 _ALGORITHM = "HS256"
 _TOKEN_EXPIRE_HOURS = 24
 
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# bcrypt 4.x raises ValueError for passwords > 72 bytes; SHA-256 prehash keeps
+# all inputs to exactly 44 ASCII bytes and is safe for any password length.
+_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__truncate_error=False)
+
+
+def _prehash(password: str) -> str:
+    return base64.b64encode(hashlib.sha256(password.encode("utf-8")).digest()).decode("ascii")
 
 
 def hash_password(password: str) -> str:
-    return _pwd_context.hash(password)
+    return _pwd_context.hash(_prehash(password))
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return _pwd_context.verify(plain, hashed)
+    return _pwd_context.verify(_prehash(plain), hashed)
 
 
 def create_access_token(user_id: str) -> str:
