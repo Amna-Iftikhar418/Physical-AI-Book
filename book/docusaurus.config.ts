@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Physical AI & Humanoid Robotics',
   tagline: 'An AI-native university textbook on ROS 2, Digital Twins, NVIDIA Isaac, and Vision-Language-Action models',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/icon.png',
 
   future: {
     v4: true,
@@ -59,7 +59,7 @@ const config: Config = {
       title: 'Physical AI & Humanoid Robotics',
       logo: {
         alt: 'Physical AI Textbook Logo',
-        src: 'img/logo.svg',
+        src: 'img/icon.png',
       },
       items: [
         {
