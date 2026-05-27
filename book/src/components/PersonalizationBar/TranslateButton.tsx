@@ -50,45 +50,19 @@ export default function TranslateButton({ docId, onTranslate }: Props): React.Re
   }
 
   return (
-    <div
-      style={{
-        marginBottom: '1.5rem',
-        padding: '0.75rem 1rem',
-        background: 'var(--ifm-color-warning-lightest, #fff8e1)',
-        borderRadius: '8px',
-        borderLeft: '4px solid var(--ifm-color-warning, #f0a500)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.75rem',
-        flexWrap: 'wrap',
-      }}
-    >
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
       {loading ? (
-        <span style={{ fontStyle: 'italic', color: 'var(--ifm-color-warning-dark, #b07800)', fontSize: '0.95rem' }}>
-          ⏳ Translating to Urdu…
-        </span>
+        <span className="actionPillLoading">Translating to Urdu…</span>
       ) : (
-        <button
-          onClick={handleTranslate}
-          style={{
-            background: 'var(--ifm-color-warning, #f0a500)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '0.45rem 1.1rem',
-            cursor: 'pointer',
-            fontWeight: 600,
-            fontSize: '0.95rem',
-          }}
-        >
+        <button onClick={handleTranslate} className="actionPillBtn actionPillBtn--outline">
           🌐 Translate to Urdu
         </button>
       )}
       {error && (
-        <span style={{ color: 'var(--ifm-color-danger, #e53e3e)', fontSize: '0.875rem' }}>
+        <span style={{ color: '#e05555', fontSize: '0.72rem', fontFamily: "'Outfit', sans-serif", letterSpacing: '0.02em' }}>
           {error}
         </span>
       )}
-    </div>
+    </span>
   );
 }

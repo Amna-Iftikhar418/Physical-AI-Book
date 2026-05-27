@@ -50,45 +50,19 @@ export default function PersonalizeButton({ docId, onPersonalize }: Props): Reac
   }
 
   return (
-    <div
-      style={{
-        marginBottom: '1.5rem',
-        padding: '0.75rem 1rem',
-        background: 'var(--ifm-color-primary-lightest, #e8f4fd)',
-        borderRadius: '8px',
-        borderLeft: '4px solid var(--ifm-color-primary)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.75rem',
-        flexWrap: 'wrap',
-      }}
-    >
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', marginRight: '0.5rem' }}>
       {loading ? (
-        <span style={{ fontStyle: 'italic', color: 'var(--ifm-color-primary)', fontSize: '0.95rem' }}>
-          ⏳ Personalizing for your level…
-        </span>
+        <span className="actionPillLoading">Personalizing…</span>
       ) : (
-        <button
-          onClick={handlePersonalize}
-          style={{
-            background: 'var(--ifm-color-primary)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '0.45rem 1.1rem',
-            cursor: 'pointer',
-            fontWeight: 600,
-            fontSize: '0.95rem',
-          }}
-        >
-          ✨ Personalize for Me
+        <button onClick={handlePersonalize} className="actionPillBtn actionPillBtn--amber">
+          ✨ Personalize for me
         </button>
       )}
       {error && (
-        <span style={{ color: 'var(--ifm-color-danger, #e53e3e)', fontSize: '0.875rem' }}>
+        <span style={{ color: '#e05555', fontSize: '0.72rem', fontFamily: "'Outfit', sans-serif", letterSpacing: '0.02em' }}>
           {error}
         </span>
       )}
-    </div>
+    </span>
   );
 }
