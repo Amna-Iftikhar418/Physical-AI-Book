@@ -12,7 +12,7 @@ def set_startup_error(err: str) -> None:
 
 @router.get("/health")
 async def health():
-    resp: dict = {"status": "ok", "version": "1.0.3"}
+    resp: dict = {"status": "ok", "version": "1.0.4"}
     if _startup_error:
         resp["startup_error"] = _startup_error
     return resp

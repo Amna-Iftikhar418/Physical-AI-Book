@@ -59,7 +59,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Physical AI Textbook API", version="1.0.3", lifespan=lifespan)
+app = FastAPI(title="Physical AI Textbook API", version="1.0.4", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
