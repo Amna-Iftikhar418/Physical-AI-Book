@@ -8,5 +8,5 @@ sqlalchemy[asyncio]
 alembic
 python-dotenv
 pydantic
-passlib[bcrypt]
+bcrypt
 python-jose[cryptography]

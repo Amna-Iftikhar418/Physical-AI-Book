@@ -2,29 +2,28 @@ import base64
 import hashlib
 from datetime import datetime, timedelta, timezone
 
+import bcrypt as _bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from config import JWT_SECRET_KEY
 
 _ALGORITHM = "HS256"
 _TOKEN_EXPIRE_HOURS = 24
 
-# bcrypt 4.x raises ValueError for passwords > 72 bytes; SHA-256 prehash keeps
-# all inputs to exactly 44 ASCII bytes and is safe for any password length.
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__truncate_error=False)
 
-
-def _prehash(password: str) -> str:
-    return base64.b64encode(hashlib.sha256(password.encode("utf-8")).digest()).decode("ascii")
+def _prehash(password: str) -> bytes:
+    # SHA-256 + base64 → 44 ASCII bytes, safely within bcrypt's 72-byte limit.
+    # passlib 1.7.4 + bcrypt 4.x is broken (detect_wrap_bug crashes on init),
+    # so we use bcrypt directly and bypass passlib entirely.
+    return base64.b64encode(hashlib.sha256(password.encode("utf-8")).digest())
 
 
 def hash_password(password: str) -> str:
-    return _pwd_context.hash(_prehash(password))
+    return _bcrypt.hashpw(_prehash(password), _bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return _pwd_context.verify(_prehash(plain), hashed)
+    return _bcrypt.checkpw(_prehash(plain), hashed.encode("utf-8"))
 
 
 def create_access_token(user_id: str) -> str:
