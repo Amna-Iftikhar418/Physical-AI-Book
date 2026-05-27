@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers.health import router as health_router, set_startup_error
+from routers.health import router as health_router, set_startup_error, set_cors_origins
 
 _startup_err: str | None = None
 chat_router = None  # type: ignore[assignment]
@@ -55,12 +55,14 @@ async def lifespan(app: FastAPI):
     except Exception:
         import traceback
         print("DB init warning (non-fatal):", traceback.format_exc())
+    print("CORS ORIGINS:", CORS_ORIGINS)
+    set_cors_origins(CORS_ORIGINS)
     routes = [f"{m} {r.path}" for r in app.routes for m in getattr(r, "methods", [])]
     print("REGISTERED ROUTES:", routes)
     yield
 
 
-app = FastAPI(title="Physical AI Textbook API", version="1.0.5", lifespan=lifespan)
+app = FastAPI(title="Physical AI Textbook API", version="1.0.6", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

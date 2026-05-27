@@ -22,11 +22,10 @@ DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 BETTER_AUTH_SECRET: str = os.getenv("BETTER_AUTH_SECRET", "")
 BETTER_AUTH_BASE_URL: str = os.getenv("BETTER_AUTH_BASE_URL", "http://localhost:3000")
 JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", BETTER_AUTH_SECRET or "dev-secret-change-in-production")
-# Normalize to lowercase: browsers send the origin host lowercased
-# (GitHub Pages serves amna-iftikhar418.github.io), and Starlette matches
-# allow_origins case-sensitively — so a mixed-case env value would never match.
+# Normalize: lowercase (browsers send lowercase host) + strip trailing slashes
+# (Railway env vars with accidental trailing slash would never match).
 CORS_ORIGINS: list[str] = [
-    o.strip().lower()
+    o.strip().lower().rstrip('/')
     for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
     if o.strip()
 ]
