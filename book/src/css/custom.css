@@ -1145,15 +1145,6 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
   font-family: 'Playfair Display', serif;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   FOOTER — doc pages: hide full footer, show nothing
-   Custom Footer component (src/theme/Footer/index.tsx) handles
-   all footer rendering — no CSS overrides needed here.
-═══════════════════════════════════════════════════════════ */
-
-body:has(.theme-doc-sidebar-container) .footer-main-grid {
-  display: none;
-}
 
 /* ═══════════════════════════════════════════════════════════
    DOC CARDS (category index pages)

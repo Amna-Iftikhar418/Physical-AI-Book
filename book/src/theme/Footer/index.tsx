@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from '@docusaurus/Link';
 
 const YEAR = new Date().getFullYear();
@@ -17,6 +17,12 @@ const COURSE = [
 ];
 
 export default function Footer(): React.ReactElement {
+  const [isDocPage, setIsDocPage] = useState(false);
+
+  useEffect(() => {
+    setIsDocPage(!!document.querySelector('.theme-doc-sidebar-container'));
+  }, []);
+
   return (
     <footer style={{
       background: '#07070f',
@@ -42,8 +48,8 @@ export default function Footer(): React.ReactElement {
         pointerEvents: 'none',
       }} />
 
-      {/* ── main content ── */}
-      <div className="footer-main-grid" style={{
+      {/* ── main content — hidden on doc pages ── */}
+      {!isDocPage && <div style={{
         maxWidth: '1100px',
         margin: '0 auto',
         padding: '3.5rem 2rem 0',
@@ -161,7 +167,7 @@ export default function Footer(): React.ReactElement {
             </span>
           </a>
         </div>
-      </div>
+      </div>}
 
       {/* ── bottom bar ── */}
       <div style={{
