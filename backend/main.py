@@ -31,6 +31,7 @@ if not _startup_err:
 
 try:
     from routers.auth import router as auth_router  # type: ignore[assignment]
+    print("AUTH ROUTER LOADED OK")
 except Exception:
     import traceback
     print("AUTH ROUTER LOAD ERROR:", traceback.format_exc())
