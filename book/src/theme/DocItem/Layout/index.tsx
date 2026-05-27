@@ -27,48 +27,25 @@ export default function DocItemLayout(props: Record<string, unknown>): React.Rea
     <DocOverrideContext.Provider value={{ handlePersonalize, handleTranslate, docId: metadata.id }}>
       {overrideContent ? (
         <div style={{ maxWidth: '100%' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              marginBottom: '1rem',
-              padding: '0.5rem 0.75rem',
-              background: isTranslated
-                ? 'var(--ifm-color-warning-lightest, #fff8e1)'
-                : 'var(--ifm-color-success-lightest, #e6f4ea)',
-              borderRadius: '6px',
-              borderLeft: `4px solid ${
-                isTranslated
-                  ? 'var(--ifm-color-warning, #f0a500)'
-                  : 'var(--ifm-color-success, #28a745)'
-              }`,
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 600,
-                color: isTranslated
-                  ? 'var(--ifm-color-warning-dark, #b07800)'
-                  : 'var(--ifm-color-success, #28a745)',
-                fontSize: '0.95rem',
-              }}
-            >
-              {isTranslated ? '🌐 Translated to Urdu' : '✅ Personalized for your skill level'}
-            </span>
+          <div className={`docOverrideBanner ${isTranslated ? 'docOverrideBanner--urdu' : 'docOverrideBanner--personalized'}`}>
+            <div className="docOverrideBanner__icon">
+              {isTranslated ? '🌐' : '✨'}
+            </div>
+            <div className="docOverrideBanner__content">
+              <span className="docOverrideBanner__label">
+                {isTranslated ? 'Translated to Urdu' : 'Personalized for your skill level'}
+              </span>
+              <span className="docOverrideBanner__sub">
+                {isTranslated
+                  ? 'Showing AI-generated Urdu translation'
+                  : 'Content adapted to your background'}
+              </span>
+            </div>
             <button
               onClick={() => window.location.reload()}
-              style={{
-                background: 'transparent',
-                border: '1px solid var(--ifm-color-primary)',
-                color: 'var(--ifm-color-primary)',
-                borderRadius: '4px',
-                padding: '0.25rem 0.75rem',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-              }}
+              className="docOverrideBanner__reset"
             >
-              {isTranslated ? '🔄 Switch to English' : '↩ Back to original'}
+              {isTranslated ? 'Switch to English' : 'Back to original'}
             </button>
           </div>
           <div className="markdown">

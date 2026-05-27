@@ -1313,41 +1313,73 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
 .actionPillBtn {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.35rem;
   font-family: 'Outfit', sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.73rem;
   font-weight: 600;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  border-radius: 3px;
-  padding: 0.28rem 0.9rem;
+  border-radius: 4px;
+  padding: 0.32rem 0.95rem;
   cursor: pointer;
-  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  transition: background 0.18s, border-color 0.18s, color 0.18s, box-shadow 0.18s;
   white-space: nowrap;
   line-height: 1;
 }
 
+/* Personalize — electric blue */
 .actionPillBtn--amber {
   color: #5b9aff;
-  background: transparent;
-  border: 1px solid rgba(91, 154, 255, 0.35);
+  background: rgba(91, 154, 255, 0.08);
+  border: 1px solid rgba(91, 154, 255, 0.4);
 }
 
 .actionPillBtn--amber:hover {
-  background: rgba(91, 154, 255, 0.09);
-  border-color: rgba(91, 154, 255, 0.7);
+  color: #a8d0ff;
+  background: rgba(91, 154, 255, 0.15);
+  border-color: rgba(91, 154, 255, 0.75);
+  box-shadow: 0 0 10px rgba(91, 154, 255, 0.15);
 }
 
+/* Translate — violet accent */
 .actionPillBtn--outline {
-  color: #7a7a90;
-  background: transparent;
-  border: 1px solid rgba(120, 120, 144, 0.3);
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.07);
+  border: 1px solid rgba(167, 139, 250, 0.35);
 }
 
 .actionPillBtn--outline:hover {
-  color: #d8d8d8;
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(120, 120, 144, 0.55);
+  color: #c4b5fd;
+  background: rgba(167, 139, 250, 0.14);
+  border-color: rgba(167, 139, 250, 0.65);
+  box-shadow: 0 0 10px rgba(167, 139, 250, 0.12);
+}
+
+/* Light mode overrides for pill buttons */
+[data-theme='light'] .actionPillBtn--amber {
+  color: #1a49be;
+  background: rgba(37, 99, 235, 0.07);
+  border: 1px solid rgba(37, 99, 235, 0.4);
+}
+
+[data-theme='light'] .actionPillBtn--amber:hover {
+  color: #1338a8;
+  background: rgba(37, 99, 235, 0.13);
+  border-color: rgba(37, 99, 235, 0.7);
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.1);
+}
+
+[data-theme='light'] .actionPillBtn--outline {
+  color: #6d28d9;
+  background: rgba(109, 40, 217, 0.06);
+  border: 1px solid rgba(109, 40, 217, 0.35);
+}
+
+[data-theme='light'] .actionPillBtn--outline:hover {
+  color: #5b21b6;
+  background: rgba(109, 40, 217, 0.11);
+  border-color: rgba(109, 40, 217, 0.6);
+  box-shadow: 0 0 8px rgba(109, 40, 217, 0.1);
 }
 
 .actionPillLoading {
@@ -1355,4 +1387,150 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
   font-size: 0.72rem;
   letter-spacing: 0.04em;
   color: #7a7a90;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DOC OVERRIDE BANNER (Personalized / Urdu translation active)
+═══════════════════════════════════════════════════════════ */
+
+.docOverrideBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1.1rem;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Personalized — electric blue neural theme */
+.docOverrideBanner--personalized {
+  background: rgba(91, 154, 255, 0.06);
+  border-color: #5b9aff;
+  box-shadow: 0 1px 12px rgba(91, 154, 255, 0.08);
+}
+
+/* Urdu — violet accent */
+.docOverrideBanner--urdu {
+  background: rgba(167, 139, 250, 0.06);
+  border-color: #a78bfa;
+  box-shadow: 0 1px 12px rgba(167, 139, 250, 0.08);
+}
+
+/* Light mode adjustments */
+[data-theme='light'] .docOverrideBanner--personalized {
+  background: rgba(37, 99, 235, 0.05);
+  border-color: #2563eb;
+  box-shadow: 0 1px 10px rgba(37, 99, 235, 0.07);
+}
+
+[data-theme='light'] .docOverrideBanner--urdu {
+  background: rgba(109, 40, 217, 0.05);
+  border-color: #6d28d9;
+  box-shadow: 0 1px 10px rgba(109, 40, 217, 0.07);
+}
+
+.docOverrideBanner__icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.docOverrideBanner__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.docOverrideBanner__label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+[data-theme='dark'] .docOverrideBanner--personalized .docOverrideBanner__label {
+  color: #96c4ff;
+}
+
+[data-theme='dark'] .docOverrideBanner--urdu .docOverrideBanner__label {
+  color: #c4b5fd;
+}
+
+[data-theme='light'] .docOverrideBanner--personalized .docOverrideBanner__label {
+  color: #1a49be;
+}
+
+[data-theme='light'] .docOverrideBanner--urdu .docOverrideBanner__label {
+  color: #5b21b6;
+}
+
+.docOverrideBanner__sub {
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+[data-theme='dark'] .docOverrideBanner__sub {
+  color: #6868a0;
+}
+
+[data-theme='light'] .docOverrideBanner__sub {
+  color: #9a8870;
+}
+
+.docOverrideBanner__reset {
+  flex-shrink: 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.8rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  background: transparent;
+}
+
+[data-theme='dark'] .docOverrideBanner--personalized .docOverrideBanner__reset {
+  color: #5b9aff;
+  border: 1px solid rgba(91, 154, 255, 0.3);
+}
+
+[data-theme='dark'] .docOverrideBanner--personalized .docOverrideBanner__reset:hover {
+  background: rgba(91, 154, 255, 0.1);
+  border-color: rgba(91, 154, 255, 0.6);
+}
+
+[data-theme='dark'] .docOverrideBanner--urdu .docOverrideBanner__reset {
+  color: #a78bfa;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+}
+
+[data-theme='dark'] .docOverrideBanner--urdu .docOverrideBanner__reset:hover {
+  background: rgba(167, 139, 250, 0.1);
+  border-color: rgba(167, 139, 250, 0.6);
+}
+
+[data-theme='light'] .docOverrideBanner--personalized .docOverrideBanner__reset {
+  color: #1a49be;
+  border: 1px solid rgba(37, 99, 235, 0.35);
+}
+
+[data-theme='light'] .docOverrideBanner--personalized .docOverrideBanner__reset:hover {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.6);
+}
+
+[data-theme='light'] .docOverrideBanner--urdu .docOverrideBanner__reset {
+  color: #5b21b6;
+  border: 1px solid rgba(109, 40, 217, 0.35);
+}
+
+[data-theme='light'] .docOverrideBanner--urdu .docOverrideBanner__reset:hover {
+  background: rgba(109, 40, 217, 0.08);
+  border-color: rgba(109, 40, 217, 0.6);
 }
