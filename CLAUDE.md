@@ -8,8 +8,9 @@ You are an expert AI assistant specializing in Spec-Driven Development (SDD). Yo
 
 ## Project: Physical AI & Humanoid Robotics Textbook
 
-**Hackathon**: Panaversity Hackathon I | **Deadline**: Nov 30, 2025, 6:00 PM
+**Hackathon**: Panaversity Hackathon I | **Deadline**: Nov 30, 2025 (completed)
 **Scoring**: 300 pts max — 100 base (book + chatbot required together), +50 each for subagents, auth, personalization, Urdu translation
+**Status**: All scoring features implemented — auth (US3), personalization (US4), Urdu translation (US5), subagents (qdrant-indexer)
 **Live site**: `https://Amna-Iftikhar418.github.io/Physical-AI-Book/`
 **Constitution**: `.specify/memory/constitution.md` — authoritative for all product decisions
 
@@ -42,6 +43,7 @@ QDRANT_URL=...
 QDRANT_API_KEY=...
 DATABASE_URL=...          # Neon Postgres connection string
 CORS_ORIGINS=http://localhost:3000,https://Amna-Iftikhar418.github.io
+JWT_SECRET_KEY=...        # or BETTER_AUTH_SECRET — used to sign/verify JWTs
 ```
 
 `backend/config.py` raises `EnvironmentError` at startup if any required key is missing.
@@ -50,16 +52,23 @@ CORS_ORIGINS=http://localhost:3000,https://Amna-Iftikhar418.github.io
 
 | File | Role |
 |------|------|
-| `backend/main.py` | FastAPI app entry point, CORS middleware |
+| `backend/main.py` | FastAPI app entry point, CORS middleware; auth/personalize/translate routers loaded with try/except (non-fatal) |
 | `backend/config.py` | Env var validation and loading |
 | `backend/routers/chat.py` | `POST /api/chat`, `POST /api/chat/select` |
 | `backend/routers/health.py` | `GET /health` → `{"status":"ok","version":"1.0.0"}` |
+| `backend/routers/auth.py` | `POST /api/auth/signup`, `POST /api/auth/signin`, `GET /api/auth/session`, `GET /api/user/profile` |
+| `backend/routers/personalize.py` | `POST /api/personalize` |
+| `backend/routers/translate.py` | `POST /api/translate` |
+| `backend/auth.py` | JWT helpers: `create_access_token`, `hash_password`, `verify_password`, `verify_token` (uses `bcrypt` directly — no passlib) |
 | `backend/services/rag.py` | Full RAG pipeline: embed → Qdrant search → Gemini generate |
 | `backend/services/agents.py` | `book_model` (`gemini-2.5-flash`) + system prompt |
-| `backend/db/models.py` | SQLAlchemy models: `Conversation`, `Message` |
+| `backend/db/models.py` | SQLAlchemy models: `Conversation`, `Message`, `User`, `UserProfile` |
 | `book/docusaurus.config.ts` | `customFields.apiUrl` — backend URL for frontend |
 | `book/src/lib/api-client.ts` | Frontend API calls — reads URL from `siteConfig.customFields` |
 | `book/src/components/ChatWidget/` | Chat panel UI (💬 button + panel) |
+| `book/src/components/Auth/AuthButton.tsx` | Sign-up / sign-in modal; stores JWT in localStorage |
+| `book/src/components/PersonalizationBar/PersonalizeButton.tsx` | Calls `POST /api/personalize`; injects skill-level context into chat |
+| `book/src/components/PersonalizationBar/TranslateButton.tsx` | Calls `POST /api/translate`; toggles Urdu translation |
 | `.claude/agents/qdrant-indexer.md` | Subagent: index book content into Qdrant |
 | `.claude/commands/generate-chapter-outline.md` | Agent skill: generate chapter outlines |
 
@@ -78,8 +87,15 @@ CORS_ORIGINS=http://localhost:3000,https://Amna-Iftikhar418.github.io
 | GET | `/health` | — | `{"status":"ok","version":"1.0.0"}` |
 | POST | `/api/chat` | `{query, session_id?, chapter_id?}` | `{answer, session_id, sources[]}` |
 | POST | `/api/chat/select` | `{query, session_id?, chapter_id}` | `{answer, session_id, sources[]}` |
+| POST | `/api/auth/signup` | `{email, password, software_level, python_familiarity, linux_familiarity, hardware_background, ai_ml_familiarity}` | `{access_token, user_id}` |
+| POST | `/api/auth/signin` | `{email, password}` | `{access_token, user_id}` |
+| GET | `/api/auth/session` | `Authorization: Bearer <token>` | `{user_id, email}` |
+| GET | `/api/user/profile` | `Authorization: Bearer <token>` | `{email, software_level, ...}` |
+| POST | `/api/personalize` | `{user_id, preferences}` | `{status}` |
+| POST | `/api/translate` | `{text, target_language}` | `{translated_text}` |
 
 RAG errors surface as HTTP 503 `"RAG pipeline unavailable: {exc}"`. DB write failures are non-fatal (rollback + proceed).
+Auth/personalize/translate routers are imported with try/except — startup succeeds even if they fail to load (check logs for `AUTH ROUTER LOAD ERROR`).
 
 ### Known pitfalls — do NOT reintroduce
 
@@ -87,6 +103,9 @@ RAG errors surface as HTTP 503 `"RAG pipeline unavailable: {exc}"`. DB write fai
 2. **Docusaurus + webpack 5**: `process` is not polyfilled in the browser. Never use `process.env.*` in client modules. Use `import siteConfig from '@generated/docusaurus.config'` and read from `siteConfig.customFields.apiUrl`.
 3. **Gemini quota**: `gemini-2.0-flash` and `gemini-2.0-flash-lite` have exhausted free-tier quota on the project API key. Use `gemini-2.5-flash`.
 4. **Backend root**: `GET /` → `{"detail":"Not Found"}` is expected — no root route exists. Test via `http://localhost:3000`, not `http://localhost:8000`.
+5. **bcrypt — no passlib**: `passlib` was removed (caused startup crash). Auth uses `bcrypt` directly via `backend/auth.py`. Do not re-add `passlib`.
+6. **CORS on error responses**: A global exception handler in `main.py` ensures CORS headers are present even on 500 errors. Do not remove it — CORS-less 500s break the browser client silently.
+7. **Auth router is optional at startup**: `main.py` wraps each router import in try/except so a broken auth dependency never kills the whole server. If auth endpoints return 404, check Railway logs for import errors.
 
 ### Deployment pipeline
 

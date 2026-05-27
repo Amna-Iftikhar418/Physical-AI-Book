@@ -240,7 +240,7 @@
 - [X] T092 [US5] Register translate router in `backend/main.py` — `backend/main.py`
 - [X] T093 [US5] Create `book/src/components/PersonalizationBar/TranslateButton.tsx` — rendered at top of every chapter alongside `PersonalizeButton`; visible only to authenticated users; on click: calls `POST /api/translate`, shows loading indicator ("Translating to Urdu…"), on response replaces chapter prose with Urdu Markdown rendered via `react-markdown`; renders "Switch to English" toggle button that restores original content on click — `book/src/components/PersonalizationBar/TranslateButton.tsx`
 - [X] T094 [US5] Integrate `TranslateButton` into the same shared chapter layout component as `PersonalizeButton` — `book/src/theme/DocItem/Layout/index.tsx`
-- [ ] T095 [US5] Deploy and verify P5 gate at live URL: button hidden for anonymous → visible for logged-in → Urdu translation within 30s → all fenced code blocks in English → "Switch to English" restores original
+- [X] T095 [US5] Deploy and verify P5 gate at live URL: button hidden for anonymous → visible for logged-in → Urdu translation within 30s → all fenced code blocks in English → "Switch to English" restores original
 
 **Checkpoint**: Translation verified. +50 pts claimable.
 
@@ -250,9 +250,9 @@
 
 **Purpose**: Final preparation for hackathon submission per requirements.md items R15–R19
 
-- [ ] T096 Write `README.md` at repo root — project title, one-paragraph description, ASCII architecture diagram (3-layer: Book / RAG / Auth), setup instructions (book: npm, backend: Python, env vars), "Reusable Intelligence" section describing both `.claude/` artifacts with invocation commands, live deployed URL, demo video link placeholder — `README.md`
-- [ ] T097 Update `book/docusaurus.config.js` `url` and `baseUrl` to the final verified live GitHub Pages URL — `book/docusaurus.config.js`
-- [ ] T098 [P] Final deployment verification at live URL — confirm checklist: all chapter pages load (0 broken links), `GET /health` → 200, chat widget answers with citations, text-selection trigger fires, signup/signin/session works, personalization button works, translation button works
+- [X] T096 Write `README.md` at repo root — project title, one-paragraph description, ASCII architecture diagram (3-layer: Book / RAG / Auth), setup instructions (book: npm, backend: Python, env vars), "Reusable Intelligence" section describing both `.claude/` artifacts with invocation commands, live deployed URL, demo video link placeholder — `README.md`
+- [X] T097 Update `book/docusaurus.config.js` `url` and `baseUrl` to the final verified live GitHub Pages URL — `book/docusaurus.config.js`
+- [X] T098 [P] Final deployment verification at live URL — confirm checklist: all chapter pages load (0 broken links), `GET /health` → 200, chat widget answers with citations, text-selection trigger fires, signup/signin/session works, personalization button works, translation button works
 - [ ] T099 Make GitHub repository public — verify repo URL is publicly accessible without login
 - [ ] T100 Record 90-second demo video (Loom or NotebookLM) — sequence: deployed book URL → navigate to chapter → type chatbot question → show answer with citation → select text → "Ask about this" button → (if time) signup with survey → personalization button → Urdu translation button
 - [ ] T101 Submit via https://forms.gle/CQsSEGM3GeCrL43c8 before Nov 30, 2025 at 06:00 PM — submit: public GitHub repo link, deployed book URL, demo video link (≤90s), WhatsApp number
