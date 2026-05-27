@@ -1,78 +1,130 @@
-# Physical AI & Humanoid Robotics Textbook
+<div align="center">
 
-An interactive, AI-powered university textbook on Physical AI and Humanoid Robotics, built with Spec-Driven Development. It pairs a full Docusaurus book with an embedded RAG chatbot that answers questions grounded exclusively in the book's content, along with user auth, per-chapter personalization, and Urdu translation.
+# Physical AI & Humanoid Robotics
 
-- **Live book**: https://Amna-Iftikhar418.github.io/Physical-AI-Book/
-- **Demo video**: _[placeholder — to be added after recording]_
-- **Constitution** (authoritative product spec): `.specify/memory/constitution.md`
+**An AI-native university textbook — live, searchable, and conversational**
+
+[![Live Book](https://img.shields.io/badge/Live%20Book-GitHub%20Pages-0969da?style=for-the-badge&logo=github)](https://Amna-Iftikhar418.github.io/Physical-AI-Book/)
+[![Backend](https://img.shields.io/badge/Backend-Railway-7c3aed?style=for-the-badge&logo=railway)](https://railway.app)
+[![Docusaurus](https://img.shields.io/badge/Docusaurus-3.10-3ecc5f?style=for-the-badge&logo=docusaurus)](https://docusaurus.io)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![Gemini](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?style=for-the-badge&logo=google)](https://ai.google.dev)
+
+*ROS 2 · Digital Twins · NVIDIA Isaac · Vision-Language-Action Models*
+
+</div>
+
+---
+
+## What Is This?
+
+A full university-level textbook on Physical AI and Humanoid Robotics, paired with an embedded RAG chatbot that answers questions grounded **exclusively** in the book's content. Every page has a floating chat assistant, text-selection contextual Q&A, per-chapter AI personalization, and Urdu translation — all deployed and live.
+
+Built for the **Panaversity Hackathon I** using Spec-Driven Development. Score: **300 / 300 pts**.
+
+---
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| **18-chapter textbook** | 4 modules covering ROS 2, Digital Twins, NVIDIA Isaac, and VLA models |
+| **RAG chatbot** | Answers grounded in the book — never hallucinates beyond it |
+| **Text-selection Q&A** | Select any passage → "Ask about this" → chapter-scoped answer |
+| **JWT Auth** | Signup with background survey; signin; persistent sessions |
+| **AI Personalization** | Rewrites chapters for your skill level (beginner → advanced) |
+| **Urdu Translation** | Full prose translated; code blocks preserved exactly |
+| **Claude Code subagents** | `qdrant-indexer` subagent + `/generate-chapter-outline` skill |
+| **Neural Circuit theme** | Custom dark UI — navy backgrounds, gold headings, electric blue accents |
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     BOOK (Frontend)                         │
-│  Docusaurus 3 + React 19 + TypeScript                       │
-│  GitHub Pages — https://Amna-Iftikhar418.github.io/...      │
-│                                                             │
-│  ChatWidget │ AuthButton │ PersonalizeButton │ TranslateBtn │
-└────────────────────────┬────────────────────────────────────┘
-                         │  HTTPS API calls
-┌────────────────────────▼────────────────────────────────────┐
-│                  RAG BACKEND (FastAPI)                       │
-│  Python + uvicorn — Railway                                  │
-│                                                             │
-│  POST /api/chat          POST /api/chat/select              │
-│  POST /api/personalize   POST /api/translate                │
-│  GET  /api/auth/session  POST /api/auth/signup              │
-│  POST /api/auth/signin   GET  /api/user/profile             │
-└──────────┬──────────────────────────┬───────────────────────┘
-           │                          │
-┌──────────▼──────────┐  ┌────────────▼──────────────────────┐
-│   AUTH / RELATIONAL │  │   VECTOR STORE                    │
-│   Neon Serverless   │  │   Qdrant Cloud                    │
-│   Postgres          │  │   collection: chapter_chunks      │
-│   users, profiles,  │  │   1536-dim Gemini embeddings      │
-│   conversations     │  │   COSINE distance, score ≥ 0.70   │
-└─────────────────────┘  └───────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                      FRONTEND  (GitHub Pages)                    │
+│  Docusaurus 3.10 · React 19 · TypeScript                         │
+│                                                                  │
+│  Root.tsx          →  FAB chat button + text-selection button    │
+│  ChatPanel.tsx     →  Streaming chat UI with source citations    │
+│  AuthButton.tsx    →  Signup / signin modal (JWT stored locally) │
+│  PersonalizeBtn    →  AI rewrite for user's skill level          │
+│  TranslateBtn      →  Urdu translation toggle                    │
+└─────────────────────────────┬────────────────────────────────────┘
+                              │  HTTPS REST API
+┌─────────────────────────────▼────────────────────────────────────┐
+│                      BACKEND  (Railway · Docker)                 │
+│  FastAPI 0.115 · Python 3.11 · uvicorn                           │
+│                                                                  │
+│  POST /api/chat             RAG query (any chapter)              │
+│  POST /api/chat/select      RAG query (chapter-scoped)           │
+│  POST /api/auth/signup      Create account + skill profile       │
+│  POST /api/auth/signin      Issue JWT                            │
+│  GET  /api/auth/session     Verify JWT → user info               │
+│  GET  /api/user/profile     Fetch skill profile                  │
+│  POST /api/personalize      AI rewrite for skill level           │
+│  POST /api/translate        Gemini Urdu translation              │
+│  GET  /health               Liveness probe                       │
+└──────────┬───────────────────────────────┬───────────────────────┘
+           │                               │
+┌──────────▼──────────┐       ┌────────────▼──────────────────────┐
+│  Neon Serverless    │       │  Qdrant Cloud                     │
+│  Postgres           │       │  collection: chapter_chunks       │
+│                     │       │                                   │
+│  users              │       │  3072-dim COSINE vectors          │
+│  user_profiles      │       │  gemini-embedding-2               │
+│  conversations      │       │  score_threshold: 0.70            │
+│  messages           │       │  top_k: 5                         │
+└─────────────────────┘       └───────────────────────────────────┘
 ```
 
 ---
 
-## Features
+## Tech Stack
 
-| Feature | Status | Points |
-|---------|--------|--------|
-| Full textbook (18 chapters, 4 modules) | Live | +100 base |
-| RAG chatbot with citations | Live | (included) |
-| Text-selection contextual Q&A | Live | (included) |
-| Signup / signin with background survey | Live | +50 |
-| Per-chapter AI personalization | Live | +50 |
-| Urdu translation (code blocks preserved) | Live | +50 |
-| Claude Code subagents + agent skills | Committed | +50 |
-
-**Total: 300 / 300 pts**
+| Layer | Technology |
+|-------|-----------|
+| Frontend framework | Docusaurus 3.10.1 + React 19 |
+| Frontend language | TypeScript |
+| Frontend hosting | GitHub Pages (auto-deploy via Actions) |
+| Backend framework | FastAPI 0.115 |
+| Backend language | Python 3.11 |
+| Backend hosting | Railway (Docker container) |
+| AI / LLM | Google Gemini 2.5 Flash |
+| Embeddings | Google `gemini-embedding-2` (3072 dims) |
+| Vector store | Qdrant Cloud |
+| Relational DB | Neon Serverless Postgres (asyncpg) |
+| Auth | JWT HS256 (python-jose) + bcrypt |
+| ORM | SQLAlchemy (async) |
 
 ---
 
-## Setup
+## Quick Start
 
 ### Prerequisites
 
-- Node.js 20+
-- Python 3.11+
-- Git
+- Node.js 20+, Python 3.11+, Git
+- Google AI Studio API key
+- Qdrant Cloud cluster (free tier works)
+- Neon Postgres database (free tier works)
 
-### Frontend (Docusaurus book)
+### 1 — Clone
+
+```bash
+git clone https://github.com/Amna-Iftikhar418/Physical-AI-Book.git
+cd Physical-AI-Book
+```
+
+### 2 — Frontend
 
 ```powershell
 cd book
 npm install
-npm start            # http://localhost:3000
+npm start        # → http://localhost:3000
 ```
 
-### Backend (FastAPI + RAG)
+### 3 — Backend
 
 ```powershell
 cd backend
@@ -92,61 +144,70 @@ CORS_ORIGINS=http://localhost:3000,https://Amna-Iftikhar418.github.io
 JWT_SECRET_KEY=<random 32+ char secret>
 ```
 
-Run locally:
-
 ```powershell
-.venv\Scripts\uvicorn main:app --reload   # http://localhost:8000
+.venv\Scripts\uvicorn main:app --reload   # → http://localhost:8000
 ```
 
-Health check:
+Verify:
 
 ```powershell
 curl http://localhost:8000/health
-# {"status":"ok","version":"1.0.0"}
+# {"status":"ok","version":"1.0.8"}
 ```
 
-### Index book content into Qdrant
+### 4 — Index book content into Qdrant
+
+Only needed once (or after editing chapters):
 
 ```powershell
-# From repo root
-python backend/scripts/build_manifest.py        # builds backend/docs_manifest.json
-python backend/subagents/index_to_qdrant.py     # embeds + upserts to Qdrant
+python backend/scripts/build_manifest.py        # build backend/docs_manifest.json
+python backend/subagents/index_to_qdrant.py     # embed + upsert to Qdrant
 ```
+
+Or invoke the `qdrant-indexer` Claude Code subagent — it handles both steps automatically.
 
 ---
 
-## Reusable Intelligence
+## Project Structure
 
-This project ships two committed, reusable Claude Code artifacts that are actively invoked during the authoring and indexing workflow (constitution Principle VI). Both live in `.claude/` and qualify for the +50 bonus.
-
-### Agent Skill — `/generate-chapter-outline`
-
-- **File**: `.claude/commands/generate-chapter-outline.md`
-- **What it does**: Reads the constitution and `requirements.md` to confirm scope, then produces a structured Markdown outline for a requested chapter — H2 sections mapped to the 13-week breakdown, 3–5 sub-topic bullets per section, exactly one `[CODE EXAMPLE: ...]` placeholder per section, and one learning objective per section tied to the 6 course outcomes (LO1–LO6). It outlines only; it does not write the full chapter.
-- **How to invoke**: `/generate-chapter-outline <chapter-id>`
-  (e.g. `/generate-chapter-outline module-1-ros2/week-3-5-ros2-fundamentals`)
-- **Expected output**: The outline, followed by a confirmation summary — chapter id, section count, estimated word count, and the learning outcomes covered.
-- **When used**: Before writing each chapter MDX file (tasks T020–T037).
-
-### Subagent — `qdrant-indexer`
-
-- **File**: `.claude/agents/qdrant-indexer.md`
-- **What it does**: Re-indexes the book into Qdrant after any chapter MDX changes. It verifies `backend/docs_manifest.json` exists (rebuilding it via `build_manifest.py` if missing), runs `backend/subagents/index_to_qdrant.py`, and reports chapters seen, chunks built, final point count in the `chapter_chunks` collection, and any failed `chapter_id`s.
-- **How to invoke**: Reference the `qdrant-indexer` subagent in Claude Code, or run directly:
-
-  ```powershell
-  python backend/subagents/index_to_qdrant.py
-  ```
-
-- **Expected output**:
-
-  ```
-  Loaded manifest: <M> chapters
-  Total chunks to index: <N>
-  Indexing complete. Total points in collection: <N>
-  ```
-
-- **When used**: After writing or updating any chapter MDX, to keep the RAG index current.
+```
+.
+├── book/                       Docusaurus 3 frontend
+│   ├── docs/                   18 chapter MDX files (4 modules)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ChatWidget/     ChatPanel, SelectionButton, FAB
+│   │   │   ├── Auth/           AuthButton (signup/signin modal)
+│   │   │   └── PersonalizationBar/  PersonalizeButton, TranslateButton
+│   │   ├── theme/              Swizzled: Root, Footer, Navbar, DocBreadcrumbs
+│   │   ├── lib/                api-client.ts, auth-client.ts
+│   │   └── css/                custom.css — Neural Circuit dark theme
+│   └── docusaurus.config.ts    Site config + apiUrl customField
+│
+├── backend/                    FastAPI RAG backend
+│   ├── routers/                chat.py, auth.py, health.py, personalize.py, translate.py
+│   ├── services/               rag.py, agents.py, personalization.py, translation.py
+│   ├── db/                     SQLAlchemy models, asyncpg connection, Alembic migrations
+│   ├── subagents/              index_to_qdrant.py
+│   ├── scripts/                build_manifest.py
+│   ├── utils/                  retry.py (exponential backoff for Gemini API)
+│   ├── auth.py                 JWT + bcrypt helpers
+│   ├── config.py               Env var loading + validation
+│   ├── main.py                 App entry, CORS, lifespan, router wiring
+│   ├── docs_manifest.json      Chapter text cache for personalization + indexing
+│   └── Dockerfile              Railway deploy
+│
+├── .claude/
+│   ├── agents/qdrant-indexer.md    Subagent: re-index Qdrant after chapter edits
+│   └── commands/generate-chapter-outline.md   Skill: generate chapter outlines
+│
+├── .specify/memory/constitution.md  Authoritative product spec
+├── specs/                      SDD feature specs, plans, and task lists
+├── history/                    Prompt History Records + Architecture Decision Records
+├── .github/workflows/          deploy-book.yml → GitHub Pages
+├── railway.json                Railway build + healthcheck config
+└── README.md
+```
 
 ---
 
@@ -154,37 +215,57 @@ This project ships two committed, reusable Claude Code artifacts that are active
 
 | Component | Platform | Trigger |
 |-----------|----------|---------|
-| Book (frontend) | GitHub Pages | Push to `main` (`.github/workflows/deploy-book.yml`) |
-| Backend (API) | Railway | Auto-deploy from `main` |
-| Vector store | Qdrant Cloud | Manual re-index via `qdrant-indexer` subagent |
-| Database | Neon Serverless Postgres | Alembic migrations |
+| Frontend (book) | GitHub Pages | Auto on push to `main` |
+| Backend (API) | Railway (Docker) | Auto on push to `main` |
+| Vector index | Qdrant Cloud | Manual via `qdrant-indexer` subagent |
+| Database schema | Neon Postgres | SQLAlchemy auto-creates tables on startup |
+
+**Required Railway env vars**: `GOOGLE_API_KEY`, `QDRANT_URL`, `QDRANT_API_KEY`, `DATABASE_URL`, `CORS_ORIGINS`, `JWT_SECRET_KEY`
+
+**Required GitHub Actions secret**: `DOCUSAURUS_API_URL` (set to the Railway backend URL)
 
 ---
 
-## Project Structure
+## Claude Code Agents
+
+Two reusable artifacts ship with the repo:
+
+### `/generate-chapter-outline`
 
 ```
-├── book/                   # Docusaurus 3 frontend
-│   ├── docs/               # 18 chapter MDX files
-│   ├── src/components/     # ChatWidget, Auth, PersonalizationBar
-│   └── src/theme/          # Swizzled Navbar + Root + DocItem
-├── backend/                # FastAPI RAG backend
-│   ├── routers/            # chat, auth, personalize, translate
-│   ├── services/           # rag.py, agents.py, personalization, translation
-│   ├── db/                 # SQLAlchemy models + Alembic migrations
-│   ├── subagents/          # index_to_qdrant.py
-│   └── scripts/            # build_manifest.py
-├── .claude/
-│   ├── agents/             # qdrant-indexer subagent
-│   └── commands/           # generate-chapter-outline skill
-├── specs/                  # SDD spec, plan, tasks
-└── history/                # Prompt History Records + ADRs
+.claude/commands/generate-chapter-outline.md
 ```
+
+Reads the constitution and requirements, then generates a structured Markdown outline for any chapter — H2 sections aligned to the 13-week schedule, sub-topic bullets, code-example placeholders, and learning objectives mapped to LO1–LO6.
+
+```
+/generate-chapter-outline module-1-ros2/week-3-5-ros2-fundamentals
+```
+
+### `qdrant-indexer` subagent
+
+```
+.claude/agents/qdrant-indexer.md
+```
+
+Rebuilds `docs_manifest.json` if needed, runs `index_to_qdrant.py`, and reports chapter count, chunk count, and any failures. Invoke it any time a chapter MDX file changes.
 
 ---
 
-## Hackathon
+## Content
 
-**Panaversity Hackathon I** — Deadline: Nov 30, 2025  
-Built by: Amna Iftikhar  
-Scoring: 300 / 300 pts
+| Module | Topic | Chapters |
+|--------|-------|---------|
+| 1 | ROS 2 Fundamentals | 5 |
+| 2 | Digital Twins | 4 |
+| 3 | NVIDIA Isaac Platform | 5 |
+| 4 | Vision-Language-Action Models | 4 |
+
+**Total**: 18 chapters · 4 modules · 13-week curriculum
+
+---
+
+## Author
+
+**Amna Iftikhar**  
+[GitHub](https://github.com/Amna-Iftikhar418) 

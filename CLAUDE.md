@@ -1,29 +1,34 @@
-# Claude Code Rules
+# Claude Code — Persistent Context
 
-This file is generated during init for the selected agent.
-
-You are an expert AI assistant specializing in Spec-Driven Development (SDD). Your primary goal is to work with the architext to build products.
+You are an expert AI assistant for this project. This file is the single source of truth for all context needed to work on it. Read it fully at the start of every session.
 
 ---
 
-## Project: Physical AI & Humanoid Robotics Textbook
+## Project Identity
 
-**Hackathon**: Panaversity Hackathon I | **Deadline**: Nov 30, 2025 (completed)
-**Scoring**: 300 pts max — 100 base (book + chatbot required together), +50 each for subagents, auth, personalization, Urdu translation
-**Status**: All scoring features implemented — auth (US3), personalization (US4), Urdu translation (US5), subagents (qdrant-indexer)
-**Live site**: `https://Amna-Iftikhar418.github.io/Physical-AI-Book/`
-**Constitution**: `.specify/memory/constitution.md` — authoritative for all product decisions
+**Name**: Physical AI & Humanoid Robotics Textbook  
+**Hackathon**: Panaversity Hackathon I — completed Nov 30, 2025  
+**Scoring**: 300 pts max — 100 base (book + chatbot), +50 each: subagents, auth, personalization, Urdu translation  
+**Status**: All scoring features implemented and deployed  
+**Live site**: `https://Amna-Iftikhar418.github.io/Physical-AI-Book/`  
+**Constitution**: `.specify/memory/constitution.md` — authoritative for all product decisions  
+**Git user**: Amna Iftikhar (`amnaiftikhar413@gmail.com`)
 
-### Architecture
+---
+
+## Architecture
 
 | Layer | Stack | Deployed on |
 |-------|-------|-------------|
-| Book (frontend) | Docusaurus 3.10.1 + React 19 + TypeScript | GitHub Pages |
-| AI/RAG (backend) | FastAPI + uvicorn, Python, `google-generativeai` SDK | Railway |
+| Frontend (book) | Docusaurus 3.10.1, React 19, TypeScript | GitHub Pages |
+| Backend (API/RAG) | FastAPI + uvicorn, Python, `google-generativeai` SDK | Railway (Docker) |
 | Vector store | Qdrant Cloud — collection `chapter_chunks` | Qdrant Cloud free tier |
-| Relational DB | Neon Serverless Postgres — sessions + conversations | Neon free tier |
+| Relational DB | Neon Serverless Postgres — async via `asyncpg` | Neon free tier |
+| Auth | JWT (HS256, 24h expiry) via `python-jose` + `bcrypt` | In-process |
 
-### Running locally
+---
+
+## Running Locally
 
 ```powershell
 # Backend — from C:\Hackathon 1\backend\
@@ -33,288 +38,292 @@ You are an expert AI assistant specializing in Spec-Driven Development (SDD). Yo
 npm start                                         # port 3000
 ```
 
-Always use `.venv\Scripts\uvicorn` (not system uvicorn). Use **PowerShell tool** for Windows paths — Bash tool cannot resolve backslash paths.
+- Always use `.venv\Scripts\uvicorn` (not system uvicorn).
+- Use **PowerShell tool** for all Windows paths — the Bash tool cannot resolve backslash paths.
+- Backend health check: `GET http://localhost:8000/health` → `{"status":"ok","version":"1.0.8"}`
+- Frontend test URL: `http://localhost:3000` (not 8000 — no root route on backend)
 
-### Required backend .env
+---
+
+## Required Backend `.env`
+
+File lives at `C:\Hackathon 1\backend\.env` (not tracked in git).
 
 ```
 GOOGLE_API_KEY=...
 QDRANT_URL=...
 QDRANT_API_KEY=...
-DATABASE_URL=...          # Neon Postgres connection string
+DATABASE_URL=...             # Neon Postgres connection string (postgresql://)
 CORS_ORIGINS=http://localhost:3000,https://Amna-Iftikhar418.github.io
-JWT_SECRET_KEY=...        # or BETTER_AUTH_SECRET — used to sign/verify JWTs
+JWT_SECRET_KEY=...           # or BETTER_AUTH_SECRET — used to sign/verify JWTs
 ```
 
-`backend/config.py` raises `EnvironmentError` at startup if any required key is missing.
+`backend/config.py` collects (does not raise) missing vars into `MISSING_VARS`; `main.py` surfaces them via `/health` so Railway doesn't crash-loop on the old build.
 
-### Key source files
+---
 
-| File | Role |
-|------|------|
-| `backend/main.py` | FastAPI app entry point, CORS middleware; auth/personalize/translate routers loaded with try/except (non-fatal) |
-| `backend/config.py` | Env var validation and loading |
-| `backend/routers/chat.py` | `POST /api/chat`, `POST /api/chat/select` |
-| `backend/routers/health.py` | `GET /health` → `{"status":"ok","version":"1.0.0"}` |
-| `backend/routers/auth.py` | `POST /api/auth/signup`, `POST /api/auth/signin`, `GET /api/auth/session`, `GET /api/user/profile` |
-| `backend/routers/personalize.py` | `POST /api/personalize` |
-| `backend/routers/translate.py` | `POST /api/translate` |
-| `backend/auth.py` | JWT helpers: `create_access_token`, `hash_password`, `verify_password`, `verify_token` (uses `bcrypt` directly — no passlib) |
-| `backend/services/rag.py` | Full RAG pipeline: embed → Qdrant search → Gemini generate |
-| `backend/services/agents.py` | `book_model` (`gemini-2.5-flash`) + system prompt |
-| `backend/db/models.py` | SQLAlchemy models: `Conversation`, `Message`, `User`, `UserProfile` |
-| `book/docusaurus.config.ts` | `customFields.apiUrl` — backend URL for frontend |
-| `book/src/lib/api-client.ts` | Frontend API calls — reads URL from `siteConfig.customFields` |
-| `book/src/components/ChatWidget/` | Chat panel UI (💬 button + panel) |
-| `book/src/components/Auth/AuthButton.tsx` | Sign-up / sign-in modal; stores JWT in localStorage |
-| `book/src/components/PersonalizationBar/PersonalizeButton.tsx` | Calls `POST /api/personalize`; injects skill-level context into chat |
-| `book/src/components/PersonalizationBar/TranslateButton.tsx` | Calls `POST /api/translate`; toggles Urdu translation |
-| `.claude/agents/qdrant-indexer.md` | Subagent: index book content into Qdrant |
-| `.claude/commands/generate-chapter-outline.md` | Agent skill: generate chapter outlines |
-
-### Models actually in use (may differ from spec)
+## Models in Use
 
 | Purpose | Model ID | Notes |
 |---------|---------|-------|
 | Chat / generation | `gemini-2.5-flash` | Switched from `gemini-2.0-flash` — free-tier quota exhausted |
-| Embeddings | `models/gemini-embedding-2` | 1536 dims; task_type `retrieval_query` / `retrieval_document` |
-| Qdrant collection | `chapter_chunks` | score_threshold 0.70, top_k 5 |
+| Personalization rewrite | `gemini-2.5-flash` | `personalization_model` in `agents.py` |
+| Translation (Urdu) | `gemini-2.5-flash` | `translation_model` in `agents.py` |
+| Embeddings | `models/gemini-embedding-2` | 3072 dims; `task_type` `retrieval_query`/`retrieval_document` |
+| Qdrant collection | `chapter_chunks` | `score_threshold=0.70`, `top_k=5`, COSINE distance |
 
-### API endpoints
-
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/health` | — | `{"status":"ok","version":"1.0.0"}` |
-| POST | `/api/chat` | `{query, session_id?, chapter_id?}` | `{answer, session_id, sources[]}` |
-| POST | `/api/chat/select` | `{query, session_id?, chapter_id}` | `{answer, session_id, sources[]}` |
-| POST | `/api/auth/signup` | `{email, password, software_level, python_familiarity, linux_familiarity, hardware_background, ai_ml_familiarity}` | `{access_token, user_id}` |
-| POST | `/api/auth/signin` | `{email, password}` | `{access_token, user_id}` |
-| GET | `/api/auth/session` | `Authorization: Bearer <token>` | `{user_id, email}` |
-| GET | `/api/user/profile` | `Authorization: Bearer <token>` | `{email, software_level, ...}` |
-| POST | `/api/personalize` | `{user_id, preferences}` | `{status}` |
-| POST | `/api/translate` | `{text, target_language}` | `{translated_text}` |
-
-RAG errors surface as HTTP 503 `"RAG pipeline unavailable: {exc}"`. DB write failures are non-fatal (rollback + proceed).
-Auth/personalize/translate routers are imported with try/except — startup succeeds even if they fail to load (check logs for `AUTH ROUTER LOAD ERROR`).
-
-### Known pitfalls — do NOT reintroduce
-
-1. **qdrant-client v1.18.0**: `.search()` removed — use `.query_points()`. Parameter is `query=` (not `query_vector=`). Results are `result.points`, not a direct list.
-2. **Docusaurus + webpack 5**: `process` is not polyfilled in the browser. Never use `process.env.*` in client modules. Use `import siteConfig from '@generated/docusaurus.config'` and read from `siteConfig.customFields.apiUrl`.
-3. **Gemini quota**: `gemini-2.0-flash` and `gemini-2.0-flash-lite` have exhausted free-tier quota on the project API key. Use `gemini-2.5-flash`.
-4. **Backend root**: `GET /` → `{"detail":"Not Found"}` is expected — no root route exists. Test via `http://localhost:3000`, not `http://localhost:8000`.
-5. **bcrypt — no passlib**: `passlib` was removed (caused startup crash). Auth uses `bcrypt` directly via `backend/auth.py`. Do not re-add `passlib`.
-6. **CORS on error responses**: A global exception handler in `main.py` ensures CORS headers are present even on 500 errors. Do not remove it — CORS-less 500s break the browser client silently.
-7. **Auth router is optional at startup**: `main.py` wraps each router import in try/except so a broken auth dependency never kills the whole server. If auth endpoints return 404, check Railway logs for import errors.
-
-### Deployment pipeline
-
-- **Frontend**: `.github/workflows/deploy-book.yml` → GitHub Pages (auto on push to `main`)
-- **Backend**: Railway auto-deploys from `main`; env vars set in Railway dashboard
+> **Note**: The indexer (`index_to_qdrant.py`) uses `EMBEDDING_DIMS=3072`; the RAG query side (`rag.py`) uses the same model. These must stay in sync if the collection is ever rebuilt.
 
 ---
 
-## Task context
+## Complete File Map
 
-**Your Surface:** You operate on a project level, providing guidance to users and executing development tasks via a defined set of tools.
+### Backend (`backend/`)
 
-**Your Success is Measured By:**
-- All outputs strictly follow the user intent.
-- Prompt History Records (PHRs) are created automatically and accurately for every user prompt.
-- Architectural Decision Record (ADR) suggestions are made intelligently for significant decisions.
-- All changes are small, testable, and reference code precisely.
+| File | Role |
+|------|------|
+| `main.py` | FastAPI app entry, CORS middleware, lifespan (DB init), all routers loaded via try/except |
+| `config.py` | Env var loading; `MISSING_VARS` list; `CORS_ORIGINS` normalized (lowercase, no trailing slash) |
+| `auth.py` | JWT helpers: `create_access_token`, `hash_password`, `verify_password`, `verify_token`; uses `bcrypt` directly (no passlib) |
+| `routers/health.py` | `GET /health` → `{"status":"ok","version":"1.0.8"}` |
+| `routers/chat.py` | `POST /api/chat`, `POST /api/chat/select`; calls `_run_chat()` shared logic |
+| `routers/auth.py` | `POST /api/auth/signup`, `POST /api/auth/signin`, `GET /api/auth/session`, `GET /api/user/profile` |
+| `routers/personalize.py` | `POST /api/personalize` — fetches user profile + rewrites chapter |
+| `routers/translate.py` | `POST /api/translate` — Urdu translation via Gemini |
+| `services/rag.py` | Full RAG pipeline: `embed_query` → `search_qdrant` → `run_rag_query` |
+| `services/agents.py` | Three Gemini models: `book_model`, `personalization_model`, `translation_model`; system prompts |
+| `services/personalization.py` | `personalize_chapter()`: reads `docs_manifest.json`, calls `personalization_model` |
+| `services/translation.py` | Translation service |
+| `db/models.py` | SQLAlchemy models: `User`, `UserProfile`, `Conversation`, `Message` |
+| `db/connection.py` | Async engine (asyncpg), strips `sslmode`/`channel_binding` from URL, injects SSL context |
+| `db/migrations/` | Alembic migration versions |
+| `subagents/index_to_qdrant.py` | One-shot indexer: reads `docs_manifest.json`, chunks, embeds, upserts to Qdrant |
+| `scripts/build_manifest.py` | Builds `docs_manifest.json` from book MDX files |
+| `utils/retry.py` | `with_retry()` — exponential backoff (2, 4, 8s) for `ResourceExhausted`/`ServiceUnavailable` |
+| `create_qdrant_indexes.py` | Standalone: creates payload indexes on `chapter_id` and `module_id` |
+| `Dockerfile` | Container for Railway deploy |
 
-## Core Guarantees (Product Promise)
+### Frontend (`book/`)
 
-- Record every user input verbatim in a Prompt History Record (PHR) after every user message. Do not truncate; preserve full multiline input.
-- PHR routing (all under `history/prompts/`):
-  - Constitution → `history/prompts/constitution/`
-  - Feature-specific → `history/prompts/<feature-name>/`
-  - General → `history/prompts/general/`
-- ADR suggestions: when an architecturally significant decision is detected, suggest: "📋 Architectural decision detected: <brief>. Document? Run `/sp.adr <title>`." Never auto‑create ADRs; require user consent.
+| File | Role |
+|------|------|
+| `docusaurus.config.ts` | Site config; `customFields.apiUrl` set via `DOCUSAURUS_API_URL` env var (falls back to `http://localhost:8000`) |
+| `sidebars.ts` | Book sidebar structure |
+| `src/lib/api-client.ts` | Chat API calls (`postChat`, `postChatSelect`); reads `apiUrl` from `siteConfig.customFields` |
+| `src/lib/auth-client.ts` | `authClient` object: `signUp`, `signIn`, `signOut`, `getSession`, `getCachedUser`; stores JWT in `localStorage` |
+| `src/theme/Root.tsx` | Global wrapper: FAB button, `SelectionButton` (text-selection → ask chat), `ChatPanel` |
+| `src/theme/DocBreadcrumbs/index.tsx` | Swizzled breadcrumbs with Personalize/Translate buttons injected |
+| `src/theme/DocItem/Layout/index.tsx` | Swizzled doc layout |
+| `src/theme/Footer/index.tsx` | Custom footer (Neural Circuit theme) |
+| `src/theme/Navbar/Content/index.tsx` | Custom navbar with auth button |
+| `src/components/ChatWidget/ChatPanel.tsx` | Full chat panel UI |
+| `src/components/ChatWidget/SelectionButton.tsx` | Floating "Ask about this" button on text selection |
+| `src/components/ChatWidget/index.tsx` | ChatWidget barrel export |
+| `src/components/Auth/AuthButton.tsx` | Sign-up / sign-in modal |
+| `src/components/PersonalizationBar/PersonalizeButton.tsx` | Calls `POST /api/personalize`; injects skill-level context |
+| `src/components/PersonalizationBar/TranslateButton.tsx` | Calls `POST /api/translate`; toggles Urdu translation |
+| `src/pages/index.tsx` | Landing page |
+| `src/pages/signup.tsx` | Dedicated sign-up page |
+| `src/pages/signin.tsx` | Dedicated sign-in page |
+| `src/css/custom.css` | Neural Circuit dark theme — all CSS custom properties |
+| `src/lib/doc-override-context.tsx` | Context for doc content overrides (personalization display) |
+
+### Root / CI
+
+| File | Role |
+|------|------|
+| `railway.json` | Railway build config: `DOCKERFILE` builder at `backend/Dockerfile`, healthcheck `/health` timeout 120s |
+| `.github/workflows/deploy-book.yml` | GitHub Actions: build Docusaurus → deploy to GitHub Pages (auto on push to `main`, plus `workflow_dispatch`) |
+| `package.json` | Root-level (for any tooling); book has its own `book/package.json` |
+
+---
+
+## API Endpoints
+
+| Method | Path | Auth | Request body | Response |
+|--------|------|------|-------------|----------|
+| GET | `/health` | — | — | `{"status":"ok","version":"1.0.8"}` |
+| POST | `/api/chat` | — | `{query, session_id?, chapter_id?}` | `{answer, session_id, sources[]}` |
+| POST | `/api/chat/select` | — | `{query, session_id?, chapter_id}` | `{answer, session_id, sources[]}` |
+| POST | `/api/auth/signup` | — | `{email, password, software_level, python_familiarity, linux_familiarity, hardware_background, ai_ml_familiarity}` | `{user_id, token}` |
+| POST | `/api/auth/signin` | — | `{email, password}` | `{user_id, token}` |
+| GET | `/api/auth/session` | Bearer JWT | — | `{user_id, email}` |
+| GET | `/api/user/profile` | Bearer JWT | — | `{user_id, email, profile:{...}}` |
+| POST | `/api/personalize` | Bearer JWT (via body `user_id`) | `{user_id, chapter_id}` | `{personalized_content}` |
+| POST | `/api/translate` | — | `{text, target_language}` | `{translated_text}` |
+
+**Validation constraints for signup:**
+- `software_level`: `beginner | intermediate | advanced`
+- `python_familiarity`, `linux_familiarity`, `hardware_background`, `ai_ml_familiarity`: `none | basic | intermediate | advanced`
+
+**Error conventions:**
+- RAG failure → HTTP 503 `"RAG pipeline unavailable: {exc}"`
+- DB write failure → non-fatal (rollback + proceed with response)
+- Auth failure → 401; duplicate email → 409; bad enum → 422
+
+---
+
+## Data Models
+
+### Postgres tables (auto-created via SQLAlchemy on startup)
+
+```
+users             id (UUID PK), email (unique), hashed_password, created_at
+user_profiles     user_id (FK→users, PK), software_level, python_familiarity,
+                  linux_familiarity, hardware_background, ai_ml_familiarity, created_at
+conversations     id (UUID PK), user_id (nullable), chapter_id (nullable), created_at
+messages          id (UUID PK), conversation_id (FK→conversations), role ('user'|'assistant'),
+                  content, created_at
+```
+
+### Qdrant collection `chapter_chunks`
+
+```
+Vector: 3072-dim COSINE (gemini-embedding-2 retrieval_document)
+Payload: chapter_id (keyword indexed), module_id (keyword indexed),
+         heading (str), text (str), char_start (int)
+Point ID: int from first 8 bytes of sha256(chapter_id:char_start)
+```
+
+---
+
+## Auth Implementation Details
+
+- `backend/auth.py` uses `bcrypt` directly — **no passlib** (passlib 1.7.4 + bcrypt 4.x crashes on init)
+- Password prehash: SHA-256 + base64 → 44 ASCII bytes (avoids bcrypt 72-byte limit)
+- JWT algorithm: HS256, 24h expiry, signed with `JWT_SECRET_KEY`
+- Frontend stores token in `localStorage` under key `physical_ai_auth_token`
+- Frontend stores user under key `physical_ai_auth_user`
+
+---
+
+## Indexing Pipeline
+
+To rebuild Qdrant index:
+1. `python backend/scripts/build_manifest.py` — regenerates `backend/docs_manifest.json` from MDX files
+2. `python backend/subagents/index_to_qdrant.py` — wipes + rebuilds `chapter_chunks` collection
+   - Chunks: 2000 chars (~500 tokens), 200 char overlap
+   - Batches of 10, 5s sleep between batches
+   - **Deletes and recreates collection on every run**
+
+Alternatively, use the `qdrant-indexer` Claude subagent: `.claude/agents/qdrant-indexer.md`
+
+---
+
+## Deployment Pipeline
+
+- **Frontend**: `.github/workflows/deploy-book.yml` → GitHub Pages, auto-deploys on push to `main`
+  - Sets `DOCUSAURUS_API_URL` to Railway backend URL during build
+- **Backend**: Railway reads `railway.json`, builds `backend/Dockerfile`, auto-deploys on push to `main`
+  - Env vars set in Railway dashboard
+  - Healthcheck at `/health` (120s timeout)
+
+---
+
+## Known Pitfalls — Do NOT Reintroduce
+
+1. **qdrant-client v1.18+**: `.search()` removed. Use `.query_points()`. Parameter is `query=` (not `query_vector=`). Results are `result.points`, not a list.
+
+2. **Docusaurus + webpack 5**: `process` is not polyfilled in the browser. Never use `process.env.*` in client-side modules. Always use `import siteConfig from '@generated/docusaurus.config'` and read from `siteConfig.customFields.apiUrl`.
+
+3. **Gemini quota**: `gemini-2.0-flash` and `gemini-2.0-flash-lite` have exhausted free-tier quota. Always use `gemini-2.5-flash`.
+
+4. **Backend root route**: `GET /` → `{"detail":"Not Found"}` — expected, no root route exists. Never test the backend by hitting `http://localhost:8000/`.
+
+5. **bcrypt — no passlib**: `passlib` was removed because `passlib 1.7.4 + bcrypt 4.x` crashes at import. Do not re-add passlib.
+
+6. **CORS on error responses**: The `_catch_exceptions` HTTP middleware in `main.py` must remain registered **before** `CORSMiddleware.add_middleware()`. This ensures error responses pass through the CORS layer. If removed, 500s arrive CORS-less and fail silently in the browser.
+
+7. **Optional routers at startup**: All four routers (chat, auth, personalize, translate) are imported inside try/except in `main.py`. A broken import never kills the server. If endpoints return 404, check Railway/local logs for `ROUTER LOAD ERROR`.
+
+8. **Database SSL**: `db/connection.py` strips `sslmode` and `channel_binding` from the Neon connection URL and passes an `ssl` context via `connect_args`. Do not re-add these as URL params — asyncpg rejects them.
+
+9. **Embedding dimensions mismatch**: The Qdrant collection was created with `size=3072` (gemini-embedding-2). If you rebuild with a different model or dimension, you must delete and recreate the collection.
+
+10. **Chapter ID mapping**: The chat widget derives `chapter_id` from `window.location.pathname` by stripping `baseUrl`. The backend has a fallback: if `chapter_id` yields no chunks, it retries with `chapter_id + "/index"` (for module landing pages).
+
+---
+
+## Theme
+
+The frontend uses the **Neural Circuit** dark theme defined in `book/src/css/custom.css`. Key CSS custom properties: deep navy/dark backgrounds, gold (`#d4a843`) headings, electric blue primary, monospace code blocks. The footer grid is hidden on doc pages (only copyright bar shown) via swizzled `Footer/index.tsx`.
+
+---
+
+## Agent Skills Available
+
+| Skill | How to invoke |
+|-------|--------------|
+| Generate chapter outline | `/generate-chapter-outline` |
+| Index book to Qdrant | Use `qdrant-indexer` subagent (`.claude/agents/qdrant-indexer.md`) |
+| Spec-driven workflows | `/sp.specify`, `/sp.plan`, `/sp.tasks`, `/sp.implement`, `/sp.phr`, `/sp.adr` |
+
+---
 
 ## Development Guidelines
 
-### 1. Authoritative Source Mandate:
-Agents MUST prioritize and use MCP tools and CLI commands for all information gathering and task execution. NEVER assume a solution from internal knowledge; all methods require external verification.
-
-### 2. Execution Flow:
-Treat MCP servers as first-class tools for discovery, verification, execution, and state capture. PREFER CLI interactions (running commands and capturing outputs) over manual file creation or reliance on internal knowledge.
-
-### 3. Knowledge capture (PHR) for Every User Input.
-After completing requests, you **MUST** create a PHR (Prompt History Record).
-
-**When to create PHRs:**
-- Implementation work (code changes, new features)
-- Planning/architecture discussions
-- Debugging sessions
-- Spec/task/plan creation
-- Multi-step workflows
-
-**PHR Creation Process:**
-
-1) Detect stage
-   - One of: constitution | spec | plan | tasks | red | green | refactor | explainer | misc | general
-
-2) Generate title
-   - 3–7 words; create a slug for the filename.
-
-2a) Resolve route (all under history/prompts/)
-  - `constitution` → `history/prompts/constitution/`
-  - Feature stages (spec, plan, tasks, red, green, refactor, explainer, misc) → `history/prompts/<feature-name>/` (requires feature context)
-  - `general` → `history/prompts/general/`
-
-3) Prefer agent‑native flow (no shell)
-   - Read the PHR template from one of:
-     - `.specify/templates/phr-template.prompt.md`
-     - `templates/phr-template.prompt.md`
-   - Allocate an ID (increment; on collision, increment again).
-   - Compute output path based on stage:
-     - Constitution → `history/prompts/constitution/<ID>-<slug>.constitution.prompt.md`
-     - Feature → `history/prompts/<feature-name>/<ID>-<slug>.<stage>.prompt.md`
-     - General → `history/prompts/general/<ID>-<slug>.general.prompt.md`
-   - Fill ALL placeholders in YAML and body:
-     - ID, TITLE, STAGE, DATE_ISO (YYYY‑MM‑DD), SURFACE="agent"
-     - MODEL (best known), FEATURE (or "none"), BRANCH, USER
-     - COMMAND (current command), LABELS (["topic1","topic2",...])
-     - LINKS: SPEC/TICKET/ADR/PR (URLs or "null")
-     - FILES_YAML: list created/modified files (one per line, " - ")
-     - TESTS_YAML: list tests run/added (one per line, " - ")
-     - PROMPT_TEXT: full user input (verbatim, not truncated)
-     - RESPONSE_TEXT: key assistant output (concise but representative)
-     - Any OUTCOME/EVALUATION fields required by the template
-   - Write the completed file with agent file tools (WriteFile/Edit).
-   - Confirm absolute path in output.
-
-4) Use sp.phr command file if present
-   - If `.**/commands/sp.phr.*` exists, follow its structure.
-   - If it references shell but Shell is unavailable, still perform step 3 with agent‑native tools.
-
-5) Shell fallback (only if step 3 is unavailable or fails, and Shell is permitted)
-   - Run: `.specify/scripts/bash/create-phr.sh --title "<title>" --stage <stage> [--feature <name>] --json`
-   - Then open/patch the created file to ensure all placeholders are filled and prompt/response are embedded.
-
-6) Routing (automatic, all under history/prompts/)
-   - Constitution → `history/prompts/constitution/`
-   - Feature stages → `history/prompts/<feature-name>/` (auto-detected from branch or explicit feature context)
-   - General → `history/prompts/general/`
-
-7) Post‑creation validations (must pass)
-   - No unresolved placeholders (e.g., `{{THIS}}`, `[THAT]`).
-   - Title, stage, and dates match front‑matter.
-   - PROMPT_TEXT is complete (not truncated).
-   - File exists at the expected path and is readable.
-   - Path matches route.
-
-8) Report
-   - Print: ID, path, stage, title.
-   - On any failure: warn but do not block the main command.
-   - Skip PHR only for `/sp.phr` itself.
-
-### 4. Explicit ADR suggestions
-- When significant architectural decisions are made (typically during `/sp.plan` and sometimes `/sp.tasks`), run the three‑part test and suggest documenting with:
-  "📋 Architectural decision detected: <brief> — Document reasoning and tradeoffs? Run `/sp.adr <decision-title>`"
-- Wait for user consent; never auto‑create the ADR.
-
-### 5. Human as Tool Strategy
-You are not expected to solve every problem autonomously. You MUST invoke the user for input when you encounter situations that require human judgment. Treat the user as a specialized tool for clarification and decision-making.
-
-**Invocation Triggers:**
-1.  **Ambiguous Requirements:** When user intent is unclear, ask 2-3 targeted clarifying questions before proceeding.
-2.  **Unforeseen Dependencies:** When discovering dependencies not mentioned in the spec, surface them and ask for prioritization.
-3.  **Architectural Uncertainty:** When multiple valid approaches exist with significant tradeoffs, present options and get user's preference.
-4.  **Completion Checkpoint:** After completing major milestones, summarize what was done and confirm next steps. 
-
-## Default policies (must follow)
-- Clarify and plan first - keep business understanding separate from technical plan and carefully architect and implement.
-- Do not invent APIs, data, or contracts; ask targeted clarifiers if missing.
-- Never hardcode secrets or tokens; use `.env` and docs.
+### Core policies
+- Clarify intent before implementing. Keep business understanding separate from technical plan.
 - Prefer the smallest viable diff; do not refactor unrelated code.
-- Cite existing code with code references (start:end:path); propose new code in fenced blocks.
-- Keep reasoning private; output only decisions, artifacts, and justifications.
+- Do not invent APIs, data, or contracts — ask if missing.
+- Never hardcode secrets or tokens; use `.env`.
+- Cite existing code with `file_path:line_number` references.
+- Default to writing no comments; only add one when the WHY is non-obvious.
+
+### PHR (Prompt History Record) — create after every substantive request
+- Route: `history/prompts/general/` (general tasks), `history/prompts/<feature-name>/` (feature work), `history/prompts/constitution/` (constitution changes)
+- Template: `.specify/templates/phr-template.prompt.md`
+- Skip PHR only for `/sp.phr` itself.
+
+### ADR suggestions
+When an architecturally significant decision is detected (long-term impact, alternatives considered, cross-cutting scope), suggest:
+> "📋 Architectural decision detected: `<brief>` — Document reasoning and tradeoffs? Run `/sp.adr <decision-title>`"
+
+Never auto-create ADRs; wait for user consent.
 
 ### Execution contract for every request
-1) Confirm surface and success criteria (one sentence).
-2) List constraints, invariants, non‑goals.
-3) Produce the artifact with acceptance checks inlined (checkboxes or tests where applicable).
-4) Add follow‑ups and risks (max 3 bullets).
-5) Create PHR in appropriate subdirectory under `history/prompts/` (constitution, feature-name, or general).
-6) If plan/tasks identified decisions that meet significance, surface ADR suggestion text as described above.
+1. Confirm surface and success criteria (one sentence).
+2. List constraints, invariants, non-goals.
+3. Produce the artifact with acceptance checks.
+4. Add follow-ups and risks (max 3 bullets).
+5. Create PHR.
+6. Surface ADR suggestion if applicable.
 
-### Minimum acceptance criteria
-- Clear, testable acceptance criteria included
-- Explicit error paths and constraints stated
-- Smallest viable change; no unrelated edits
-- Code references to modified/inspected files where relevant
+---
 
-## Architect Guidelines (for planning)
+## Project Structure
 
-Instructions: As an expert architect, generate a detailed architectural plan for [Project Name]. Address each of the following thoroughly.
+```
+C:\Hackathon 1\
+├── backend/              FastAPI app, RAG, auth, DB, indexer
+│   ├── routers/          chat.py, auth.py, health.py, personalize.py, translate.py
+│   ├── services/         rag.py, agents.py, personalization.py, translation.py
+│   ├── db/               models.py, connection.py, migrations/
+│   ├── subagents/        index_to_qdrant.py
+│   ├── scripts/          build_manifest.py
+│   ├── utils/            retry.py
+│   ├── auth.py           JWT + bcrypt helpers
+│   ├── config.py         env var loading
+│   ├── main.py           app entry point
+│   └── docs_manifest.json  chapter text for personalization + indexing
+├── book/                 Docusaurus frontend
+│   ├── docs/             MDX chapter files
+│   ├── src/
+│   │   ├── components/   ChatWidget/, Auth/, PersonalizationBar/
+│   │   ├── theme/        Root.tsx, Footer/, Navbar/, DocBreadcrumbs/, DocItem/
+│   │   ├── lib/          api-client.ts, auth-client.ts, doc-override-context.tsx
+│   │   ├── pages/        index.tsx, signup.tsx, signin.tsx
+│   │   └── css/          custom.css (Neural Circuit theme)
+│   └── docusaurus.config.ts
+├── specs/                Feature specs, plans, tasks
+├── history/              PHRs and ADRs
+├── .specify/             Constitution and templates
+├── .claude/              Agent definitions and skills
+├── railway.json          Railway deploy config
+└── CLAUDE.md             ← this file
+```
 
-1. Scope and Dependencies:
-   - In Scope: boundaries and key features.
-   - Out of Scope: explicitly excluded items.
-   - External Dependencies: systems/services/teams and ownership.
-
-2. Key Decisions and Rationale:
-   - Options Considered, Trade-offs, Rationale.
-   - Principles: measurable, reversible where possible, smallest viable change.
-
-3. Interfaces and API Contracts:
-   - Public APIs: Inputs, Outputs, Errors.
-   - Versioning Strategy.
-   - Idempotency, Timeouts, Retries.
-   - Error Taxonomy with status codes.
-
-4. Non-Functional Requirements (NFRs) and Budgets:
-   - Performance: p95 latency, throughput, resource caps.
-   - Reliability: SLOs, error budgets, degradation strategy.
-   - Security: AuthN/AuthZ, data handling, secrets, auditing.
-   - Cost: unit economics.
-
-5. Data Management and Migration:
-   - Source of Truth, Schema Evolution, Migration and Rollback, Data Retention.
-
-6. Operational Readiness:
-   - Observability: logs, metrics, traces.
-   - Alerting: thresholds and on-call owners.
-   - Runbooks for common tasks.
-   - Deployment and Rollback strategies.
-   - Feature Flags and compatibility.
-
-7. Risk Analysis and Mitigation:
-   - Top 3 Risks, blast radius, kill switches/guardrails.
-
-8. Evaluation and Validation:
-   - Definition of Done (tests, scans).
-   - Output Validation for format/requirements/safety.
-
-9. Architectural Decision Record (ADR):
-   - For each significant decision, create an ADR and link it.
-
-### Architecture Decision Records (ADR) - Intelligent Suggestion
-
-After design/architecture work, test for ADR significance:
-
-- Impact: long-term consequences? (e.g., framework, data model, API, security, platform)
-- Alternatives: multiple viable options considered?
-- Scope: cross‑cutting and influences system design?
-
-If ALL true, suggest:
-📋 Architectural decision detected: [brief-description]
-   Document reasoning and tradeoffs? Run `/sp.adr [decision-title]`
-
-Wait for consent; never auto-create ADRs. Group related decisions (stacks, authentication, deployment) into one ADR when appropriate.
-
-## Basic Project Structure
-
-- `.specify/memory/constitution.md` — Project principles
-- `specs/<feature>/spec.md` — Feature requirements
-- `specs/<feature>/plan.md` — Architecture decisions
-- `specs/<feature>/tasks.md` — Testable tasks with cases
-- `history/prompts/` — Prompt History Records
-- `history/adr/` — Architecture Decision Records
-- `.specify/` — SpecKit Plus templates and scripts
+---
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
