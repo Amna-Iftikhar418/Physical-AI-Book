@@ -35,6 +35,7 @@ type SurveyKey = (typeof SURVEY_FIELDS)[number]['id'];
 
 export default function SignupPage(): React.ReactElement {
   const homeUrl = useBaseUrl('/');
+  const signinUrl = useBaseUrl('/signin');
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -139,7 +140,7 @@ export default function SignupPage(): React.ReactElement {
         </form>
         <p style={{ marginTop: 20, opacity: 0.7 }}>
           Already have an account?{' '}
-          <a href="/signin">Sign in</a>
+          <a href={signinUrl}>Sign in</a>
         </p>
       </main>
     </Layout>

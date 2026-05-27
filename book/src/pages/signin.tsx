@@ -5,6 +5,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 export default function SigninPage(): React.ReactElement {
   const homeUrl = useBaseUrl('/');
+  const signupUrl = useBaseUrl('/signup');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -61,7 +62,7 @@ export default function SigninPage(): React.ReactElement {
         </form>
         <p style={{ marginTop: 20, opacity: 0.7 }}>
           No account yet?{' '}
-          <a href="/signup">Sign up</a>
+          <a href={signupUrl}>Sign up</a>
         </p>
       </main>
     </Layout>

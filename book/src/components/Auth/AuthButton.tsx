@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import { authClient, UserSession } from '../../lib/auth-client';
 
 export function AuthButton(): React.ReactElement {
+  const signinUrl = useBaseUrl('/signin');
+  const signupUrl = useBaseUrl('/signup');
+  const homeUrl = useBaseUrl('/');
   const [session, setSession] = useState<UserSession | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +31,7 @@ export function AuthButton(): React.ReactElement {
           onClick={() => {
             authClient.signOut();
             setSession(null);
-            window.location.href = '/';
+            window.location.href = homeUrl;
           }}
           style={{
             fontSize: 13,
@@ -48,13 +52,13 @@ export function AuthButton(): React.ReactElement {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       <a
-        href="/signin"
+        href={signinUrl}
         style={{ fontSize: 13, textDecoration: 'none', color: 'inherit', opacity: 0.9 }}
       >
         Sign In
       </a>
       <a
-        href="/signup"
+        href={signupUrl}
         style={{
           fontSize: 13,
           padding: '4px 10px',
