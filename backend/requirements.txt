@@ -1,10 +1,12 @@
 fastapi==0.111.*
 uvicorn[standard]
 google-generativeai==0.8.6
-qdrant-client
+qdrant-client>=1.18.0
 asyncpg
 psycopg2-binary
 sqlalchemy[asyncio]
 alembic
 python-dotenv
 pydantic
+passlib[bcrypt]
+python-jose[cryptography]

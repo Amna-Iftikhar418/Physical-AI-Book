@@ -176,27 +176,27 @@
 
 ### 6.1 — Database Schema
 
-- [ ] T066 [US3] Create Alembic migration adding `users` and `user_profiles` tables — `users(id UUID PK, email TEXT UNIQUE NOT NULL, created_at TIMESTAMPTZ)`, `user_profiles(user_id UUID PK FK→users.id, software_level TEXT CHECK, python_familiarity TEXT CHECK, linux_familiarity TEXT CHECK, hardware_background TEXT CHECK, ai_ml_familiarity TEXT CHECK, created_at TIMESTAMPTZ)` — `backend/db/migrations/versions/002_auth_and_profiles.py`
-- [ ] T067 [US3] Add `User` and `UserProfile` SQLAlchemy ORM models to `backend/db/models.py` — `backend/db/models.py`
-- [ ] T068 [US3] Run `alembic upgrade head` — verify `users` and `user_profiles` tables exist in Neon
+- [X] T066 [US3] Create Alembic migration adding `users` and `user_profiles` tables — `users(id UUID PK, email TEXT UNIQUE NOT NULL, created_at TIMESTAMPTZ)`, `user_profiles(user_id UUID PK FK→users.id, software_level TEXT CHECK, python_familiarity TEXT CHECK, linux_familiarity TEXT CHECK, hardware_background TEXT CHECK, ai_ml_familiarity TEXT CHECK, created_at TIMESTAMPTZ)` — `backend/db/migrations/versions/002_auth_and_profiles.py`
+- [X] T067 [US3] Add `User` and `UserProfile` SQLAlchemy ORM models to `backend/db/models.py` — `backend/db/models.py`
+- [X] T068 [US3] Run `alembic upgrade head` — verify `users` and `user_profiles` tables exist in Neon
 
 ### 6.2 — Auth Backend
 
-- [ ] T069 [US3] Implement `backend/auth.py` — password hashing with `passlib[bcrypt]`, JWT creation/validation using `python-jose`, `create_access_token(user_id)`, `verify_token(token) → user_id`, token expiry 24 hours — `backend/auth.py`; add `passlib[bcrypt]`, `python-jose[cryptography]` to `backend/requirements.txt`
-- [ ] T070 [US3] Implement `POST /api/auth/signup` in `backend/routers/auth.py` — validates all 5 profile fields (required), hashes password, inserts into `users` + `user_profiles`, returns `{user_id, token}`; 409 on duplicate email; 422 if any profile field missing — `backend/routers/auth.py`
-- [ ] T071 [US3] Implement `POST /api/auth/signin` in `backend/routers/auth.py` — verifies email + password hash, returns `{user_id, token}`; 401 on invalid credentials — `backend/routers/auth.py`
-- [ ] T072 [US3] Implement `GET /api/auth/session` in `backend/routers/auth.py` — validates Bearer token, returns `{user_id, email}`; 401 on invalid/expired — `backend/routers/auth.py`
-- [ ] T073 [US3] Implement `GET /api/user/profile` in `backend/routers/auth.py` — validates Bearer token, returns `{user_id, email, profile: {5 fields}}`; 401 if not authenticated — `backend/routers/auth.py`
-- [ ] T074 [US3] Register auth router in `backend/main.py` — `backend/main.py`
+- [X] T069 [US3] Implement `backend/auth.py` — password hashing with `passlib[bcrypt]`, JWT creation/validation using `python-jose`, `create_access_token(user_id)`, `verify_token(token) → user_id`, token expiry 24 hours — `backend/auth.py`; add `passlib[bcrypt]`, `python-jose[cryptography]` to `backend/requirements.txt`
+- [X] T070 [US3] Implement `POST /api/auth/signup` in `backend/routers/auth.py` — validates all 5 profile fields (required), hashes password, inserts into `users` + `user_profiles`, returns `{user_id, token}`; 409 on duplicate email; 422 if any profile field missing — `backend/routers/auth.py`
+- [X] T071 [US3] Implement `POST /api/auth/signin` in `backend/routers/auth.py` — verifies email + password hash, returns `{user_id, token}`; 401 on invalid credentials — `backend/routers/auth.py`
+- [X] T072 [US3] Implement `GET /api/auth/session` in `backend/routers/auth.py` — validates Bearer token, returns `{user_id, email}`; 401 on invalid/expired — `backend/routers/auth.py`
+- [X] T073 [US3] Implement `GET /api/user/profile` in `backend/routers/auth.py` — validates Bearer token, returns `{user_id, email, profile: {5 fields}}`; 401 if not authenticated — `backend/routers/auth.py`
+- [X] T074 [US3] Register auth router in `backend/main.py` — `backend/main.py`
 - [ ] T075 [US3] Add `BETTER_AUTH_SECRET` and `JWT_SECRET_KEY` to Railway/Render env vars dashboard
 
 ### 6.3 — Auth Frontend
 
-- [ ] T076 [US3] Install `better-auth` in `book/` — create `book/src/lib/auth-client.ts` exporting `authClient = createAuthClient({ baseURL: process.env.REACT_APP_API_URL })` and `useSession()` hook — `book/src/lib/auth-client.ts`
-- [ ] T077 [P] [US3] Create `book/src/components/Auth/AuthButton.tsx` — shows "Sign In / Sign Up" links when logged out; shows user email + "Sign Out" button when logged in; reads session from `authClient.useSession()` — `book/src/components/Auth/AuthButton.tsx`
-- [ ] T078 [US3] Swizzle Docusaurus Navbar to render `AuthButton` — `book/src/theme/Navbar/Content/index.tsx`
-- [ ] T079 [US3] Create `book/src/pages/signup.tsx` — form with email, password (min 8 chars), 5 required survey dropdowns (software_level, python_familiarity, linux_familiarity, hardware_background, ai_ml_familiarity); client-side validation requires all fields; on submit calls `POST /api/auth/signup`; on success stores token in localStorage and redirects to book homepage — `book/src/pages/signup.tsx`
-- [ ] T080 [US3] Create `book/src/pages/signin.tsx` — form with email + password; on submit calls `POST /api/auth/signin`; stores token; redirects to homepage; shows error on 401 — `book/src/pages/signin.tsx`
+- [X] T076 [US3] Install `better-auth` in `book/` — create `book/src/lib/auth-client.ts` exporting `authClient = createAuthClient({ baseURL: process.env.REACT_APP_API_URL })` and `useSession()` hook — `book/src/lib/auth-client.ts`
+- [X] T077 [P] [US3] Create `book/src/components/Auth/AuthButton.tsx` — shows "Sign In / Sign Up" links when logged out; shows user email + "Sign Out" button when logged in; reads session from `authClient.useSession()` — `book/src/components/Auth/AuthButton.tsx`
+- [X] T078 [US3] Swizzle Docusaurus Navbar to render `AuthButton` — `book/src/theme/Navbar/Content/index.tsx`
+- [X] T079 [US3] Create `book/src/pages/signup.tsx` — form with email, password (min 8 chars), 5 required survey dropdowns (software_level, python_familiarity, linux_familiarity, hardware_background, ai_ml_familiarity); client-side validation requires all fields; on submit calls `POST /api/auth/signup`; on success stores token in localStorage and redirects to book homepage — `book/src/pages/signup.tsx`
+- [X] T080 [US3] Create `book/src/pages/signin.tsx` — form with email + password; on submit calls `POST /api/auth/signin`; stores token; redirects to homepage; shows error on 401 — `book/src/pages/signin.tsx`
 - [ ] T081 [US3] Deploy and verify P3 gate at live URL: signup with all 5 fields → profile in Neon → signin → session persists on refresh → navbar shows email → duplicate email returns error
 
 **Checkpoint**: Auth fully verified. +50 pts claimable. Phase 7 and 8 can now begin.

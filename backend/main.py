@@ -17,6 +17,8 @@ except Exception:
 if not _startup_err and MISSING_VARS:
     _startup_err = "Missing required environment variables: " + ", ".join(MISSING_VARS)
 
+auth_router = None  # type: ignore[assignment]
+
 if not _startup_err:
     try:
         from routers.chat import router as chat_router  # type: ignore[assignment]
@@ -24,6 +26,13 @@ if not _startup_err:
         import traceback
         _startup_err = traceback.format_exc()
         chat_router = None  # type: ignore[assignment]
+
+try:
+    from routers.auth import router as auth_router  # type: ignore[assignment]
+except Exception:
+    import traceback
+    print("AUTH ROUTER LOAD ERROR:", traceback.format_exc())
+    auth_router = None  # type: ignore[assignment]
 
 # if _startup_err:
 #     set_startup_error(_startup_err)
@@ -44,3 +53,5 @@ app.add_middleware(
 app.include_router(health_router)
 if chat_router is not None:
     app.include_router(chat_router)
+if auth_router is not None:
+    app.include_router(auth_router)

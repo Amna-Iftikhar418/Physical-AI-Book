@@ -20,7 +20,17 @@ function Get-CurrentBranch {
     if ($env:SPECIFY_FEATURE) {
         return $env:SPECIFY_FEATURE
     }
-    
+
+    # Check .specify/feature file — project-level permanent override
+    $repoRoot = Get-RepoRoot
+    $featureFile = Join-Path $repoRoot ".specify/feature"
+    if (Test-Path $featureFile) {
+        $featureName = (Get-Content $featureFile -Raw).Trim()
+        if ($featureName) {
+            return $featureName
+        }
+    }
+
     # Then check git if available
     try {
         $result = git rev-parse --abbrev-ref HEAD 2>$null
@@ -72,13 +82,19 @@ function Test-FeatureBranch {
         [string]$Branch,
         [bool]$HasGit = $true
     )
-    
+
+    # Skip validation when feature is set explicitly (env var or .specify/feature file)
+    if ($env:SPECIFY_FEATURE) { return $true }
+    $repoRoot = Get-RepoRoot
+    $featureFile = Join-Path $repoRoot ".specify/feature"
+    if (Test-Path $featureFile) { return $true }
+
     # For non-git repos, we can't enforce branch naming but still provide output
     if (-not $HasGit) {
         Write-Warning "[specify] Warning: Git repository not detected; skipped branch validation"
         return $true
     }
-    
+
     if ($Branch -notmatch '^[0-9]{3}-') {
         Write-Output "ERROR: Not on a feature branch. Current branch: $Branch"
         Write-Output "Feature branches should be named like: 001-feature-name"
