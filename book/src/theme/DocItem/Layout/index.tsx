@@ -26,8 +26,10 @@ export default function DocItemLayout(props: Record<string, unknown>): React.Rea
 
   return (
     <>
-      <PersonalizeButton docId={metadata.id} onPersonalize={handlePersonalize} />
-      <TranslateButton docId={metadata.id} onTranslate={handleTranslate} />
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.25rem', marginBottom: '0.5rem' }}>
+        <PersonalizeButton docId={metadata.id} onPersonalize={handlePersonalize} />
+        <TranslateButton docId={metadata.id} onTranslate={handleTranslate} />
+      </div>
       {overrideContent ? (
         <div style={{ maxWidth: '100%' }}>
           <div

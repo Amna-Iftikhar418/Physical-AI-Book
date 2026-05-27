@@ -50,7 +50,7 @@ export default function TranslateButton({ docId, onTranslate }: Props): React.Re
   }
 
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
       {loading ? (
         <span className="actionPillLoading">Translating to Urdu…</span>
       ) : (

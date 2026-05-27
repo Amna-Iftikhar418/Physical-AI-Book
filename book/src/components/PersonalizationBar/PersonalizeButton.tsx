@@ -50,7 +50,7 @@ export default function PersonalizeButton({ docId, onPersonalize }: Props): Reac
   }
 
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', marginRight: '0.5rem' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
       {loading ? (
         <span className="actionPillLoading">Personalizing…</span>
       ) : (
