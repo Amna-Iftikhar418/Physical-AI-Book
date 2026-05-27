@@ -3,15 +3,32 @@ import OriginalLayout from '@theme-original/DocItem/Layout';
 import { useDoc } from '@docusaurus/plugin-content-docs/client';
 import ReactMarkdown from 'react-markdown';
 import PersonalizeButton from '@site/src/components/PersonalizationBar/PersonalizeButton';
+import TranslateButton from '@site/src/components/PersonalizationBar/TranslateButton';
+
+type OverrideMode = 'personalized' | 'translated' | null;
 
 export default function DocItemLayout(props: Record<string, unknown>): React.ReactElement {
   const { metadata } = useDoc();
-  const [personalizedContent, setPersonalizedContent] = useState<string | null>(null);
+  const [overrideContent, setOverrideContent] = useState<string | null>(null);
+  const [overrideMode, setOverrideMode] = useState<OverrideMode>(null);
+
+  function handlePersonalize(text: string) {
+    setOverrideContent(text);
+    setOverrideMode('personalized');
+  }
+
+  function handleTranslate(text: string) {
+    setOverrideContent(text);
+    setOverrideMode('translated');
+  }
+
+  const isTranslated = overrideMode === 'translated';
 
   return (
     <>
-      <PersonalizeButton docId={metadata.id} onPersonalize={setPersonalizedContent} />
-      {personalizedContent ? (
+      <PersonalizeButton docId={metadata.id} onPersonalize={handlePersonalize} />
+      <TranslateButton docId={metadata.id} onTranslate={handleTranslate} />
+      {overrideContent ? (
         <div style={{ maxWidth: '100%' }}>
           <div
             style={{
@@ -20,13 +37,27 @@ export default function DocItemLayout(props: Record<string, unknown>): React.Rea
               gap: '1rem',
               marginBottom: '1rem',
               padding: '0.5rem 0.75rem',
-              background: 'var(--ifm-color-success-lightest, #e6f4ea)',
+              background: isTranslated
+                ? 'var(--ifm-color-warning-lightest, #fff8e1)'
+                : 'var(--ifm-color-success-lightest, #e6f4ea)',
               borderRadius: '6px',
-              borderLeft: '4px solid var(--ifm-color-success, #28a745)',
+              borderLeft: `4px solid ${
+                isTranslated
+                  ? 'var(--ifm-color-warning, #f0a500)'
+                  : 'var(--ifm-color-success, #28a745)'
+              }`,
             }}
           >
-            <span style={{ fontWeight: 600, color: 'var(--ifm-color-success, #28a745)', fontSize: '0.95rem' }}>
-              ✅ Personalized for your skill level
+            <span
+              style={{
+                fontWeight: 600,
+                color: isTranslated
+                  ? 'var(--ifm-color-warning-dark, #b07800)'
+                  : 'var(--ifm-color-success, #28a745)',
+                fontSize: '0.95rem',
+              }}
+            >
+              {isTranslated ? '🌐 Translated to Urdu' : '✅ Personalized for your skill level'}
             </span>
             <button
               onClick={() => window.location.reload()}
@@ -40,11 +71,11 @@ export default function DocItemLayout(props: Record<string, unknown>): React.Rea
                 fontSize: '0.875rem',
               }}
             >
-              ↩ Back to original
+              {isTranslated ? '🔄 Switch to English' : '↩ Back to original'}
             </button>
           </div>
           <div className="markdown">
-            <ReactMarkdown>{personalizedContent}</ReactMarkdown>
+            <ReactMarkdown>{overrideContent}</ReactMarkdown>
           </div>
         </div>
       ) : (

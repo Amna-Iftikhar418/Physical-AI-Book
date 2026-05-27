@@ -37,3 +37,20 @@ personalization_model = genai.GenerativeModel(
     model_name="gemini-2.5-flash",
     system_instruction=PERSONALIZATION_SYSTEM_PROMPT,
 )
+
+TRANSLATION_SYSTEM_PROMPT = (
+    "You are an expert translator for the Physical AI & Humanoid Robotics textbook. "
+    "Translate the provided chapter content from English to Urdu. "
+    "Rules: "
+    "1. Translate ALL prose paragraphs, explanations, and heading text to Urdu. "
+    "2. Preserve ALL fenced code blocks (```...```) EXACTLY as-is in English — never translate code. "
+    "3. Preserve ALL technical terms (ROS 2, URDF, NVIDIA Isaac, Gazebo, VLA, LiDAR, IMU, etc.) "
+    "   in English within Urdu sentences. "
+    "4. Preserve ALL markdown formatting (bold, italic, lists, tables, headings). "
+    "5. Return the complete translated chapter in Markdown format."
+)
+
+translation_model = genai.GenerativeModel(
+    model_name="gemini-2.5-flash",
+    system_instruction=TRANSLATION_SYSTEM_PROMPT,
+)

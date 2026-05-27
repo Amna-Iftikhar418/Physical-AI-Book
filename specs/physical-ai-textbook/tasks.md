@@ -234,12 +234,12 @@
 
 **Dependency**: Phase 6 (auth) must be deployed and verified. Independent of Phase 7.
 
-- [ ] T089 [US5] Add `translation_model = genai.GenerativeModel(model_name="gemini-2.0-flash", system_instruction=TRANSLATION_SYSTEM_PROMPT)` to `backend/services/agents.py` — system prompt: translate all prose to Urdu, preserve ALL code blocks verbatim in English, preserve technical terms (ROS 2, URDF, NVIDIA Isaac, etc.) in English within Urdu prose — `backend/services/agents.py`
-- [ ] T090 [US5] Implement `backend/services/translation.py` — `translate_chapter(chapter_id)` reads from `docs_manifest.json`, calls `translation_model.generate_content()` wrapped with `with_retry()` — `backend/services/translation.py`
-- [ ] T091 [US5] Implement `POST /api/translate` in `backend/routers/translate.py` — requires Bearer token, calls translation service, returns `{translated_text}`; 401 if not authenticated; 404 if chapter_id not in manifest; 503 if LLM retries exhausted — `backend/routers/translate.py`
-- [ ] T092 [US5] Register translate router in `backend/main.py` — `backend/main.py`
-- [ ] T093 [US5] Create `book/src/components/PersonalizationBar/TranslateButton.tsx` — rendered at top of every chapter alongside `PersonalizeButton`; visible only to authenticated users; on click: calls `POST /api/translate`, shows loading indicator ("Translating to Urdu…"), on response replaces chapter prose with Urdu Markdown rendered via `react-markdown`; renders "Switch to English" toggle button that restores original content on click — `book/src/components/PersonalizationBar/TranslateButton.tsx`
-- [ ] T094 [US5] Integrate `TranslateButton` into the same shared chapter layout component as `PersonalizeButton` — `book/src/theme/DocItem/Layout/index.tsx`
+- [X] T089 [US5] Add `translation_model = genai.GenerativeModel(model_name="gemini-2.0-flash", system_instruction=TRANSLATION_SYSTEM_PROMPT)` to `backend/services/agents.py` — system prompt: translate all prose to Urdu, preserve ALL code blocks verbatim in English, preserve technical terms (ROS 2, URDF, NVIDIA Isaac, etc.) in English within Urdu prose — `backend/services/agents.py`
+- [X] T090 [US5] Implement `backend/services/translation.py` — `translate_chapter(chapter_id)` reads from `docs_manifest.json`, calls `translation_model.generate_content()` wrapped with `with_retry()` — `backend/services/translation.py`
+- [X] T091 [US5] Implement `POST /api/translate` in `backend/routers/translate.py` — requires Bearer token, calls translation service, returns `{translated_text}`; 401 if not authenticated; 404 if chapter_id not in manifest; 503 if LLM retries exhausted — `backend/routers/translate.py`
+- [X] T092 [US5] Register translate router in `backend/main.py` — `backend/main.py`
+- [X] T093 [US5] Create `book/src/components/PersonalizationBar/TranslateButton.tsx` — rendered at top of every chapter alongside `PersonalizeButton`; visible only to authenticated users; on click: calls `POST /api/translate`, shows loading indicator ("Translating to Urdu…"), on response replaces chapter prose with Urdu Markdown rendered via `react-markdown`; renders "Switch to English" toggle button that restores original content on click — `book/src/components/PersonalizationBar/TranslateButton.tsx`
+- [X] T094 [US5] Integrate `TranslateButton` into the same shared chapter layout component as `PersonalizeButton` — `book/src/theme/DocItem/Layout/index.tsx`
 - [ ] T095 [US5] Deploy and verify P5 gate at live URL: button hidden for anonymous → visible for logged-in → Urdu translation within 30s → all fenced code blocks in English → "Switch to English" restores original
 
 **Checkpoint**: Translation verified. +50 pts claimable.
