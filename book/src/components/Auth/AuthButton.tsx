@@ -7,7 +7,7 @@ const pill: React.CSSProperties = {
   fontSize: '0.78rem',
   fontWeight: 500,
   letterSpacing: '0.06em',
-  color: '#7a7a90',
+  color: '#ffffff',
   background: 'transparent',
   border: '1px solid rgba(91, 154, 255, 0.25)',
   borderRadius: '3px',
@@ -24,7 +24,7 @@ const emailText: React.CSSProperties = {
   fontFamily: "'Outfit', sans-serif",
   fontSize: '0.78rem',
   letterSpacing: '0.02em',
-  color: '#5b5b7a',
+  color: '#ffffff',
   maxWidth: '130px',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -40,7 +40,7 @@ const hoverIn = (e: React.MouseEvent<HTMLElement>) => {
 
 const hoverOut = (e: React.MouseEvent<HTMLElement>) => {
   const el = e.currentTarget as HTMLElement;
-  el.style.color = '#7a7a90';
+  el.style.color = '#ffffff';
   el.style.borderColor = 'rgba(91,154,255,0.25)';
   el.style.background = 'transparent';
 };

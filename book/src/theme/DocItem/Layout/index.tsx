@@ -26,10 +26,6 @@ export default function DocItemLayout(props: Record<string, unknown>): React.Rea
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.25rem', marginBottom: '0.5rem' }}>
-        <PersonalizeButton docId={metadata.id} onPersonalize={handlePersonalize} />
-        <TranslateButton docId={metadata.id} onTranslate={handleTranslate} />
-      </div>
       {overrideContent ? (
         <div style={{ maxWidth: '100%' }}>
           <div
@@ -81,7 +77,22 @@ export default function DocItemLayout(props: Record<string, unknown>): React.Rea
           </div>
         </div>
       ) : (
-        <OriginalLayout {...props} />
+        <div style={{ position: 'relative' }}>
+          {/* Buttons float on the RIGHT of the breadcrumb row */}
+          <div style={{
+            position: 'absolute',
+            top: '4px',
+            right: 0,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            zIndex: 10,
+          }}>
+            <PersonalizeButton docId={metadata.id} onPersonalize={handlePersonalize} />
+            <TranslateButton docId={metadata.id} onTranslate={handleTranslate} />
+          </div>
+          <OriginalLayout {...props} />
+        </div>
       )}
     </>
   );

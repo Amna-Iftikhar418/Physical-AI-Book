@@ -3,301 +3,392 @@ import { ChatPanel } from './ChatPanel';
 
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   return (
     <>
       <style>{`
         /* ─── Keyframes ──────────────────────────────────────── */
-        @keyframes sonarPing {
-          0%   { transform: scale(1);   opacity: 0.6; }
-          100% { transform: scale(2.5); opacity: 0; }
+        @keyframes orbPulse {
+          0%, 100% {
+            box-shadow:
+              0 0 0   0   rgba(251,191,36,0.0),
+              0 0 22px 5px rgba(59,130,246,0.4),
+              0 0 55px 12px rgba(29,78,216,0.25),
+              0 10px 40px rgba(0,0,0,0.6);
+          }
+          50% {
+            box-shadow:
+              0 0 0   2px  rgba(251,191,36,0.15),
+              0 0 32px 9px rgba(59,130,246,0.55),
+              0 0 75px 20px rgba(29,78,216,0.35),
+              0 14px 48px rgba(0,0,0,0.65);
+          }
         }
         @keyframes haloBorderSpin {
           to { transform: rotate(360deg); }
         }
-        @keyframes glowBreath {
-          0%, 100% {
-            box-shadow:
-              0 0 18px 4px  rgba(59,130,246,0.45),
-              0 0 50px 10px rgba(37,99,235,0.22),
-              0 8px 32px     rgba(0,0,0,0.55);
-          }
-          50% {
-            box-shadow:
-              0 0 28px 8px  rgba(59,130,246,0.65),
-              0 0 70px 18px rgba(37,99,235,0.32),
-              0 12px 40px   rgba(0,0,0,0.6);
-          }
+        @keyframes sonarRing {
+          0%   { transform: scale(1);   opacity: 0.55; }
+          100% { transform: scale(2.8); opacity: 0; }
         }
-        @keyframes iconFloat {
-          0%, 100% { transform: translateY(0) scale(1); }
-          45%      { transform: translateY(-4px) scale(1.06); }
-          75%      { transform: translateY(1px) scale(0.97); }
+        @keyframes robotFloat {
+          0%, 100% { transform: translateY(0px); }
+          50%      { transform: translateY(-3.5px); }
         }
-        @keyframes typingDot {
-          0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
-          30%           { transform: translateY(-3px); opacity: 1; }
+        @keyframes eyeGlow {
+          0%, 100% { opacity: 0.75; }
+          50%      { opacity: 1; filter: drop-shadow(0 0 3px #3b82f6); }
         }
-        @keyframes closeRotate {
-          from { transform: rotate(-45deg) scale(0.7); opacity: 0; }
-          to   { transform: rotate(0deg)  scale(1);   opacity: 1; }
+        @keyframes antennaSignal {
+          0%, 100% { transform: scaleY(1); }
+          50%      { transform: scaleY(1.25); }
         }
-        @keyframes onlinePulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
-          50%      { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+        @keyframes labelSlide {
+          from { opacity: 0; transform: translateX(12px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes closeIn {
+          from { transform: rotate(-60deg) scale(0.6); opacity: 0; }
+          to   { transform: rotate(0deg)   scale(1);   opacity: 1; }
+        }
+        @keyframes onlineRing {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.7); }
+          60%      { box-shadow: 0 0 0 5px rgba(52,211,153,0); }
+        }
+        @keyframes glintSweep {
+          0%   { opacity: 0; transform: translateX(-100%) rotate(25deg); }
+          20%  { opacity: 0.35; }
+          60%  { opacity: 0.18; }
+          100% { opacity: 0; transform: translateX(180%) rotate(25deg); }
         }
 
-        /* ─── Sonar ping rings ───────────────────────────────── */
-        .fab-sonar {
+        /* ─── Container ──────────────────────────────────────── */
+        .pai-fab-root {
+          position: fixed;
+          bottom: 28px;
+          right: 28px;
+          z-index: 9998;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 12px;
+        }
+
+        /* ─── Hover label ────────────────────────────────────── */
+        .pai-fab-label {
+          animation: labelSlide 0.22s cubic-bezier(0.34,1.56,0.64,1) both;
+          background: linear-gradient(135deg, rgba(8,14,31,0.97) 0%, rgba(14,24,60,0.97) 100%);
+          border: 1px solid rgba(251,191,36,0.22);
+          border-radius: 12px;
+          padding: 8px 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(59,130,246,0.2);
+          position: relative;
+        }
+        .pai-fab-label::after {
+          content: '';
+          position: absolute;
+          right: -7px;
+          top: 50%;
+          transform: translateY(-50%);
+          border: 7px solid transparent;
+          border-left-color: rgba(251,191,36,0.22);
+          pointer-events: none;
+        }
+        .pai-fab-label-title {
+          font-family: 'Outfit', 'Inter', sans-serif;
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #f1f5f9;
+          letter-spacing: 0.015em;
+          white-space: nowrap;
+        }
+        .pai-fab-label-sub {
+          font-family: 'Outfit', 'Inter', sans-serif;
+          font-size: 10.5px;
+          color: #64748b;
+          white-space: nowrap;
+          letter-spacing: 0.01em;
+        }
+        .pai-fab-label-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 9.5px;
+          font-family: 'Outfit', 'Inter', sans-serif;
+          font-weight: 600;
+          color: #fbbf24;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+        .pai-fab-label-badge::before {
+          content: '';
+          display: block;
+          width: 5px;
+          height: 5px;
+          background: #34d399;
+          border-radius: 50%;
+          box-shadow: 0 0 5px #34d399;
+        }
+
+        /* ─── Button wrapper ─────────────────────────────────── */
+        .pai-fab-wrap {
+          position: relative;
+          width: 64px;
+          height: 64px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        /* ─── Sonar rings ────────────────────────────────────── */
+        .pai-sonar {
           position: absolute;
           inset: 0;
           border-radius: 50%;
-          border: 1.5px solid rgba(59,130,246,0.55);
+          border: 1.5px solid rgba(251,191,36,0.35);
           pointer-events: none;
         }
-        .fab-sonar-1 { animation: sonarPing 2.6s ease-out infinite; }
-        .fab-sonar-2 { animation: sonarPing 2.6s ease-out infinite 0.9s; }
+        .pai-sonar-1 { animation: sonarRing 2.8s ease-out infinite; }
+        .pai-sonar-2 { animation: sonarRing 2.8s ease-out infinite 1.0s; }
 
         /* ─── Spinning gradient halo border ─────────────────── */
-        .fab-halo-wrap {
+        .pai-halo-wrap {
           position: absolute;
-          inset: -3px;
+          inset: -4px;
           border-radius: 50%;
-          padding: 3px;
-          animation: haloBorderSpin 6s linear infinite;
+          padding: 4px;
+          animation: haloBorderSpin 5s linear infinite;
           background: conic-gradient(
             from 0deg,
-            #1e3a8a 0%,
-            #3b82f6 20%,
-            #93c5fd 38%,
-            #fbbf24 50%,
-            #93c5fd 62%,
-            #3b82f6 80%,
+            #1e3a8a   0%,
+            #2563eb  18%,
+            #60a5fa  32%,
+            #fbbf24  50%,
+            #60a5fa  68%,
+            #2563eb  82%,
             #1e3a8a 100%
           );
           pointer-events: none;
         }
-        .fab-halo-inner {
+        .pai-halo-inner {
           width: 100%;
           height: 100%;
           border-radius: 50%;
           background: #080e1f;
         }
 
-        /* ─── Main circle button ─────────────────────────────── */
-        .fab-circle-btn {
+        /* ─── Main button ────────────────────────────────────── */
+        .pai-fab-btn {
           position: relative;
           z-index: 2;
-          width: 62px;
-          height: 62px;
+          width: 64px;
+          height: 64px;
           border-radius: 50%;
-          background: linear-gradient(145deg, #0a1628 0%, #0e1f50 35%, #1a3680 65%, #1d4ed8 100%);
           border: none;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          animation: glowBreath 3s ease-in-out infinite;
-          transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), background 0.3s;
-          overflow: visible;
+          background: radial-gradient(circle at 35% 35%,
+            #1e3a8a 0%,
+            #0f2057 40%,
+            #080e1f 100%
+          );
+          animation: orbPulse 3.2s ease-in-out infinite;
+          transition:
+            transform 0.2s cubic-bezier(0.34,1.56,0.64,1),
+            background 0.3s ease;
+          overflow: hidden;
         }
-        .fab-circle-btn:hover {
-          transform: scale(1.1);
+        .pai-fab-btn:hover {
+          transform: scale(1.08) rotate(-3deg);
         }
-        .fab-circle-btn:active {
-          transform: scale(0.95);
+        .pai-fab-btn:active {
+          transform: scale(0.94);
         }
-        .fab-circle-btn.is-open {
-          background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+        .pai-fab-btn.is-open {
+          background: radial-gradient(circle at 35% 35%,
+            #1e293b 0%,
+            #0f172a 100%
+          );
           animation: none;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(91,154,255,0.2);
+          box-shadow: 0 4px 24px rgba(0,0,0,0.7), 0 0 0 1px rgba(91,154,255,0.18);
         }
 
-        /* ─── Chat bubble icon wrapper ───────────────────────── */
-        .fab-icon-wrap {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
-        .fab-circle-btn:not(.is-open) .fab-icon-wrap {
-          animation: iconFloat 3.2s ease-in-out infinite;
-        }
-
-        /* ─── Typing dots inside bubble ──────────────────────── */
-        .fab-dot-row {
-          display: flex;
-          gap: 3px;
-          margin-top: -1px;
-        }
-        .fab-typing-dot {
-          width: 4px;
-          height: 4px;
-          border-radius: 50%;
-          background: #1d4ed8;
-        }
-        .fab-typing-dot:nth-child(1) { animation: typingDot 1.3s ease-in-out 0.0s infinite; }
-        .fab-typing-dot:nth-child(2) { animation: typingDot 1.3s ease-in-out 0.18s infinite; }
-        .fab-typing-dot:nth-child(3) { animation: typingDot 1.3s ease-in-out 0.36s infinite; }
-
-        /* ─── Close icon ─────────────────────────────────────── */
-        .fab-close-icon {
-          animation: closeRotate 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards;
-        }
-
-        /* ─── Online status dot ──────────────────────────────── */
-        .fab-online-dot {
+        /* ─── Button inner glint sweep ───────────────────────── */
+        .pai-fab-glint {
           position: absolute;
-          top: 5px;
-          right: 5px;
-          width: 10px;
-          height: 10px;
-          background: #22c55e;
+          inset: 0;
           border-radius: 50%;
-          border: 2px solid #080e1f;
-          animation: onlinePulse 2s ease-in-out infinite;
-          z-index: 3;
-          transition: opacity 0.2s;
-        }
-
-        /* ─── Tooltip ────────────────────────────────────────── */
-        .fab-container:not(.is-open):hover .fab-tooltip {
-          opacity: 1;
-          transform: translateY(-50%) translateX(0);
-          pointer-events: auto;
-        }
-        .fab-tooltip {
-          position: absolute;
-          right: calc(100% + 14px);
-          top: 50%;
-          transform: translateY(-50%) translateX(8px);
-          background: rgba(8,14,31,0.96);
-          border: 1px solid rgba(59,130,246,0.25);
-          border-radius: 10px;
-          padding: 7px 13px;
-          white-space: nowrap;
-          opacity: 0;
+          overflow: hidden;
           pointer-events: none;
-          transition: opacity 0.22s, transform 0.22s;
-          font-family: 'Outfit', sans-serif;
-          font-size: 12px;
-          color: #cbd5e1;
-          letter-spacing: 0.01em;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.4);
         }
-        .fab-tooltip-title {
-          font-weight: 600;
-          color: #e2e8f0;
-          display: block;
-          margin-bottom: 1px;
-        }
-        .fab-tooltip-sub {
-          font-size: 10.5px;
-          color: #64748b;
-          display: block;
-        }
-        .fab-tooltip::after {
+        .pai-fab-glint::after {
           content: '';
           position: absolute;
-          left: 100%;
-          top: 50%;
-          transform: translateY(-50%);
-          border: 6px solid transparent;
-          border-left-color: rgba(59,130,246,0.25);
+          top: -40%;
+          left: -40%;
+          width: 80%;
+          height: 180%;
+          background: linear-gradient(
+            100deg,
+            transparent 0%,
+            rgba(255,255,255,0.08) 50%,
+            transparent 100%
+          );
+          animation: glintSweep 4s ease-in-out infinite 1.5s;
         }
 
-        /* ─── Container ──────────────────────────────────────── */
-        .fab-container {
-          position: fixed;
-          bottom: 26px;
-          right: 26px;
-          z-index: 9998;
-          width: 62px;
-          height: 62px;
+        /* ─── Online dot ─────────────────────────────────────── */
+        .pai-online-dot {
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          width: 11px;
+          height: 11px;
+          background: #34d399;
+          border-radius: 50%;
+          border: 2px solid #080e1f;
+          animation: onlineRing 2.2s ease-in-out infinite;
+          z-index: 4;
+        }
+
+        /* ─── Robot icon wrapper ─────────────────────────────── */
+        .pai-robot-wrap {
           display: flex;
           align-items: center;
           justify-content: center;
+          animation: robotFloat 3s ease-in-out infinite;
+        }
+        .pai-robot-eye {
+          animation: eyeGlow 2.4s ease-in-out infinite;
+        }
+        .pai-robot-eye:nth-child(2) {
+          animation-delay: 0.35s;
+        }
+        .pai-antenna-tip {
+          animation: antennaSignal 2.4s ease-in-out infinite;
+          transform-origin: bottom center;
+        }
+
+        /* ─── Close icon ─────────────────────────────────────── */
+        .pai-close-icon {
+          animation: closeIn 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards;
         }
       `}</style>
 
-      <div className={`fab-container${open ? ' is-open' : ''}`}>
+      <div className="pai-fab-root">
 
-        {/* Sonar ping rings — only when closed */}
-        {!open && (
-          <>
-            <div className="fab-sonar fab-sonar-1" />
-            <div className="fab-sonar fab-sonar-2" />
-          </>
-        )}
-
-        {/* Spinning gradient halo border — only when closed */}
-        {!open && (
-          <div className="fab-halo-wrap">
-            <div className="fab-halo-inner" />
+        {/* Side label — only when hovered and closed */}
+        {!open && hovered && (
+          <div className="pai-fab-label">
+            <span className="pai-fab-label-badge">Physical AI</span>
+            <span className="pai-fab-label-title">Ask the Textbook</span>
+            <span className="pai-fab-label-sub">RAG-powered · Qdrant + Gemini</span>
           </div>
         )}
 
-        {/* Tooltip */}
-        {!open && (
-          <span className="fab-tooltip">
-            <span className="fab-tooltip-title">Ask Physical AI</span>
-            <span className="fab-tooltip-sub">RAG-powered textbook assistant</span>
-          </span>
-        )}
+        {/* Button wrapper */}
+        <div className="pai-fab-wrap">
 
-        {/* Main button */}
-        <button
-          className={`fab-circle-btn${open ? ' is-open' : ''}`}
-          onClick={() => setOpen(o => !o)}
-          aria-label={open ? 'Close chat' : 'Ask the Physical AI textbook'}
-        >
-          {/* Online dot */}
-          {!open && <span className="fab-online-dot" />}
+          {/* Sonar rings — closed only */}
+          {!open && (
+            <>
+              <div className="pai-sonar pai-sonar-1" />
+              <div className="pai-sonar pai-sonar-2" />
+            </>
+          )}
 
-          {open ? (
-            /* Close icon */
-            <span className="fab-close-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="#94a3b8" strokeWidth="2.2" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </span>
-          ) : (
-            /* Chat bubble icon with typing dots */
-            <div className="fab-icon-wrap">
-              <svg width="30" height="28" viewBox="0 0 32 30" fill="none">
-                {/* Shadow/depth layer */}
-                <path
-                  d="M3 2h26a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H11.5L4 30V4a2 2 0 0 1 2-2z"
-                  fill="rgba(30,58,138,0.35)"
-                  transform="translate(0.5, 1)"
-                />
-                {/* Main bubble */}
-                <path
-                  d="M3 2h26a2 2 0 0 1 2 2v17a2 2 0 0 1-2 2H11.5L4 30V4a2 2 0 0 1 2-2z"
-                  fill="white"
-                  opacity="0.97"
-                />
-                {/* Inner shine */}
-                <path
-                  d="M6 3h20a1 1 0 0 1 1 1v6H5V4a1 1 0 0 1 1-1z"
-                  fill="rgba(255,255,255,0.4)"
-                />
-                {/* Dots row */}
-                <circle cx="11" cy="13" r="2.2" fill="#1d4ed8"/>
-                <circle cx="16" cy="13" r="2.2" fill="#1d4ed8"/>
-                <circle cx="21" cy="13" r="2.2" fill="#1d4ed8"/>
-              </svg>
-              {/* Animated typing dots overlaid */}
-              <div className="fab-dot-row" style={{ position: 'absolute', top: 17, left: '50%', transform: 'translateX(-50%)', gap: 4 }}>
-                <div className="fab-typing-dot" />
-                <div className="fab-typing-dot" />
-                <div className="fab-typing-dot" />
-              </div>
+          {/* Spinning halo border — closed only */}
+          {!open && (
+            <div className="pai-halo-wrap">
+              <div className="pai-halo-inner" />
             </div>
           )}
-        </button>
+
+          {/* Main button */}
+          <button
+            className={`pai-fab-btn${open ? ' is-open' : ''}`}
+            onClick={() => setOpen(o => !o)}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            aria-label={open ? 'Close chat' : 'Ask the Physical AI textbook assistant'}
+          >
+            {/* Glint sweep */}
+            <div className="pai-fab-glint" />
+
+            {/* Online dot — closed only */}
+            {!open && <span className="pai-online-dot" />}
+
+            {open ? (
+              /* ── Close × ── */
+              <span className="pai-close-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </span>
+            ) : (
+              /* ── Robot head icon ── */
+              <div className="pai-robot-wrap">
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Antenna base + stem */}
+                  <rect x="17" y="2" width="2" height="6" rx="1" fill="#60a5fa" opacity="0.85"/>
+                  {/* Antenna tip (glowing circle) */}
+                  <circle className="pai-antenna-tip" cx="18" cy="2" r="2.2" fill="#fbbf24"
+                    style={{ filter: 'drop-shadow(0 0 4px #fbbf24)' }}/>
+
+                  {/* Head body — rounded rect */}
+                  <rect x="6" y="8" width="24" height="18" rx="5" ry="5"
+                    fill="url(#headGrad)" stroke="rgba(96,165,250,0.45)" strokeWidth="1"/>
+
+                  {/* Inner head highlight */}
+                  <rect x="7" y="9" width="22" height="7" rx="3"
+                    fill="rgba(255,255,255,0.06)"/>
+
+                  {/* Left eye */}
+                  <circle className="pai-robot-eye" cx="13" cy="17" r="3.2"
+                    fill="#0ea5e9" style={{ filter: 'drop-shadow(0 0 5px #38bdf8)' }}/>
+                  <circle cx="13" cy="17" r="1.4" fill="white" opacity="0.9"/>
+                  <circle cx="13.6" cy="16.4" r="0.55" fill="white"/>
+
+                  {/* Right eye */}
+                  <circle className="pai-robot-eye" cx="23" cy="17" r="3.2"
+                    fill="#0ea5e9" style={{ filter: 'drop-shadow(0 0 5px #38bdf8)' }}/>
+                  <circle cx="23" cy="17" r="1.4" fill="white" opacity="0.9"/>
+                  <circle cx="23.6" cy="16.4" r="0.55" fill="white"/>
+
+                  {/* Mouth — circuit-board style */}
+                  <rect x="12" y="22.5" width="12" height="1.8" rx="0.9" fill="rgba(96,165,250,0.6)"/>
+                  <rect x="14" y="21.5" width="1.5" height="3.8" rx="0.75" fill="rgba(96,165,250,0.4)"/>
+                  <rect x="20.5" y="21.5" width="1.5" height="3.8" rx="0.75" fill="rgba(96,165,250,0.4)"/>
+
+                  {/* Neck */}
+                  <rect x="15" y="26" width="6" height="3" rx="1.5" fill="rgba(96,165,250,0.35)"/>
+
+                  {/* Gold accent circuit nodes */}
+                  <circle cx="8" cy="13" r="1" fill="#fbbf24" opacity="0.7"/>
+                  <circle cx="28" cy="13" r="1" fill="#fbbf24" opacity="0.7"/>
+
+                  <defs>
+                    <linearGradient id="headGrad" x1="6" y1="8" x2="30" y2="26" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#1e3a8a"/>
+                      <stop offset="60%" stopColor="#1e3470"/>
+                      <stop offset="100%" stopColor="#0f172a"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            )}
+          </button>
+
+        </div>
       </div>
 
       <ChatPanel isOpen={open} onClose={() => setOpen(false)} />
