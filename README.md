@@ -12,6 +12,10 @@
 
 *ROS 2 · Digital Twins · NVIDIA Isaac · Vision-Language-Action Models*
 
+<br/>
+
+<img src="public/textbook.png" alt="Physical AI & Humanoid Robotics Textbook" width="800"/>
+
 </div>
 
 ---
