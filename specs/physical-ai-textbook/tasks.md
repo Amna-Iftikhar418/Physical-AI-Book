@@ -3,6 +3,274 @@
 **Feature**: `physical-ai-textbook`
 **Spec**: `specs/physical-ai-textbook/spec.md`
 **Plan**: `specs/physical-ai-textbook/plan.md`
+
+---
+
+## Landing Page Redesign — Dark Neural Aesthetic (2026-05-27)
+
+| ID | Title | Status | Depends On |
+|----|-------|--------|-----------|
+| T-LP01 | Create `index.module.css` with dark neural design tokens and layout styles | ⬜ TODO | — |
+| T-LP02 | Create NeuralCanvas component (canvas animated neural-net background) | ⬜ TODO | T-LP01 |
+| T-LP03 | Create HeroSection component (headline, tagline, "Start Reading" CTA) | ⬜ TODO | T-LP01 |
+| T-LP04 | Create StatsSection component (4 animated counters with IntersectionObserver) | ⬜ TODO | T-LP01 |
+| T-LP05 | Create ModulesSection component (4 glowing module cards) | ⬜ TODO | T-LP01 |
+| T-LP06 | Create FeaturesSection component (4 feature highlights grid) | ⬜ TODO | T-LP01 |
+| T-LP07 | Create TechSection component (floating tech stack badges) | ⬜ TODO | T-LP01 |
+| T-LP08 | Create CtaSection component (bottom call-to-action strip) | ⬜ TODO | T-LP01 |
+| T-LP09 | Assemble full `index.tsx` replacing the old one-line redirect | ⬜ TODO | T-LP02–T-LP08 |
+| T-LP10 | Update `custom.css` dark-mode primary color to neural cyan | ⬜ TODO | — |
+| T-LP11 | TypeScript build verification — `npm run build` exits 0 | ⬜ TODO | T-LP09, T-LP10 |
+| T-LP12 | Manual browser verification of full landing page | ⬜ TODO | T-LP11 |
+
+### T-LP01 — Create `index.module.css`
+
+**File**: `book/src/pages/index.module.css` (CREATE NEW)
+
+CSS classes required:
+- `.page` — dark bg (#050A14), white text, full width
+- `.canvas` — `position: fixed; inset: 0; z-index: 0; pointer-events: none`
+- `.hero` — `min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 1; padding: 2rem 1.5rem`
+- `.heroChip` — pill badge: `background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); color: #00D4FF; border-radius: 100px; padding: 0.3rem 1rem; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1.5rem; display: inline-block`
+- `.heroTitle` — `font-size: clamp(2.5rem,6vw,5rem); font-weight: 800; line-height: 1.1; margin: 0 0 1.5rem; color: #E2E8F0`
+- `.heroAccent` — cyan-violet gradient text: `background: linear-gradient(135deg, #00D4FF, #7B2FFF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text`
+- `.heroTagline` — `font-size: 1.1rem; color: #94A3B8; max-width: 600px; margin: 0 auto 2.5rem; line-height: 1.7`
+- `.heroCta` — primary button: cyan bg, dark text, border-radius 8px, hover glow + translateY(-2px)
+- `.heroSecondary` — muted secondary link
+- `.statsSection` — `display: flex; flex-wrap: wrap; justify-content: space-around; gap: 2rem; padding: 4rem 2rem; background: rgba(10,22,40,0.5); border-top/bottom: 1px solid rgba(0,212,255,0.1); position: relative; z-index: 1`
+- `.statItem` — `text-align: center; flex: 1; min-width: 120px`
+- `.statNumber` — large gradient text number
+- `.statLabel` — muted uppercase label
+- `.sectionWrapper` — `position: relative; z-index: 1; padding: 5rem 1.5rem`
+- `.sectionInner` — `max-width: 1200px; margin: 0 auto`
+- `.sectionTitle` — large centered heading
+- `.sectionSubtitle` — muted centered subheading
+- `.modulesGrid` — `display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 3rem`
+- `.moduleCard` — glassmorphism card: dark bg, cyan border, blur, transition
+- `.moduleCardCyan:hover` — cyan glow
+- `.moduleCardViolet:hover` — violet glow
+- `.moduleCardIcon`, `.moduleCardTitle`, `.moduleCardDesc`, `.moduleCardLink` — card inner elements
+- `.featuresGrid` — same as `.modulesGrid`
+- `.featureCard` — slightly simpler card variant
+- `.featureIcon`, `.featureTitle`, `.featureDesc` — feature card inner elements
+- `.techSection` — centered, z-index 1
+- `.techBadges` — flex wrap centered
+- `.techBadge` — pill shape, dark bg, cyan border; nth-child float animations with staggered delays
+- `@keyframes float` — `0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); }`
+- `.ctaSection` — centered, gradient bg, top border
+- `.ctaTitle`, `.ctaSubtitle`, `.ctaButton` — CTA strip elements
+- `@media (max-width: 768px)` — responsive overrides
+
+**Acceptance criteria**: File created, all classes defined, no syntax errors
+
+---
+
+### T-LP02 — NeuralCanvas component
+
+**File**: Part of `book/src/pages/index.tsx`
+
+```tsx
+function NeuralCanvas(): JSX.Element {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d')!;
+    // Set dimensions
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    // 60 nodes
+    const nodes = Array.from({ length: 60 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+    }));
+    let animId: number;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Move & bounce nodes
+      nodes.forEach(n => {
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
+        if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
+      });
+      // Draw lines
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < 150) {
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.strokeStyle = `rgba(0, 212, 255, ${(1 - dist/150) * 0.4})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+      // Draw nodes
+      nodes.forEach(n => {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 212, 255, 0.6)';
+        ctx.fill();
+      });
+      animId = requestAnimationFrame(draw);
+    }
+    draw();
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+  return <canvas ref={canvasRef} className={styles.canvas} />;
+}
+```
+
+**Acceptance criteria**: Canvas renders, nodes move, lines appear/disappear based on proximity
+
+---
+
+### T-LP03 — HeroSection component
+
+```tsx
+function HeroSection(): JSX.Element {
+  return (
+    <section className={styles.hero}>
+      <span className={styles.heroChip}>AI-Native University Textbook</span>
+      <h1 className={styles.heroTitle}>
+        Physical AI &<br />
+        <span className={styles.heroAccent}>Humanoid Robotics</span>
+      </h1>
+      <p className={styles.heroTagline}>
+        Master ROS 2 · Digital Twins · NVIDIA Isaac · Vision-Language-Action Models
+      </p>
+      <div>
+        <Link to={useBaseUrl('/intro')} className={styles.heroCta}>
+          Start Reading →
+        </Link>
+        <a
+          href="https://github.com/Amna-Iftikhar418/Physical-AI-Book"
+          className={styles.heroSecondary}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View on GitHub
+        </a>
+      </div>
+    </section>
+  );
+}
+```
+
+**Acceptance criteria**: Hero renders at full viewport height, CTA links to `/intro`
+
+---
+
+### T-LP04 — StatsSection component
+
+Uses `useState` for displayed values + `IntersectionObserver` to trigger count-up animation when section scrolls into view.
+
+Stats: `[{ end: 4, label: 'Modules' }, { end: 13, label: 'Weeks' }, { end: 18, label: 'Chapters' }, { text: 'AI', label: 'Powered' }]`
+
+**Acceptance criteria**: Numbers count up from 0 when section enters viewport; animation runs once
+
+---
+
+### T-LP05 — ModulesSection component
+
+Module data (defined as const outside component):
+- `{ icon: '🤖', title: 'Module 1: ROS 2', desc: 'Nodes, topics, services, actions, and the robotic nervous system.', path: '/module-1-ros2/module-1-ros2', variant: 'cyan' }`
+- `{ icon: '🌐', title: 'Module 2: Digital Twins', desc: 'Gazebo and Unity simulation, physics engines, and sensor modeling.', path: '/module-2-digital-twin/module-2-digital-twin', variant: 'violet' }`
+- `{ icon: '⚡', title: 'Module 3: NVIDIA Isaac', desc: 'Isaac Sim, VSLAM, Nav2, perception pipelines, and Sim-to-Real.', path: '/module-3-isaac/module-3-isaac', variant: 'cyan' }`
+- `{ icon: '🧠', title: 'Module 4: VLA Models', desc: 'Humanoid locomotion, voice commands, GPT integration, conversational AI.', path: '/module-4-vla/module-4-vla', variant: 'violet' }`
+
+**Acceptance criteria**: 4 cards in 2-column grid; hover shows correct glow color; links navigate correctly
+
+---
+
+### T-LP06 — FeaturesSection component
+
+Feature data (const):
+- `{ icon: '💬', title: 'AI Chat Assistant', desc: 'RAG-powered Q&A grounded exclusively in textbook content.' }`
+- `{ icon: '✨', title: 'Personalized Learning', desc: 'Chapter content rewritten for your exact skill level.' }`
+- `{ icon: '🌐', title: 'Urdu Translation', desc: 'Full chapter translation to Urdu with one click.' }`
+- `{ icon: '🔍', title: 'Text Selection Q&A', desc: 'Highlight any passage in a chapter to ask about it.' }`
+
+**Acceptance criteria**: 4 feature cards render; no links needed (informational only)
+
+---
+
+### T-LP07 — TechSection component
+
+Badges: `['ROS 2', 'NVIDIA Isaac', 'Python', 'Gemini AI', 'Qdrant', 'FastAPI', 'React']`
+
+**Acceptance criteria**: 7 badges render with float animation visible in browser
+
+---
+
+### T-LP08 — CtaSection component
+
+Simple centered strip with title, subtitle, and "Open the Book →" link to `/intro`.
+
+**Acceptance criteria**: Renders at page bottom with distinct gradient background
+
+---
+
+### T-LP09 — Assemble full index.tsx
+
+Replace `book/src/pages/index.tsx` with complete file:
+- All imports at top
+- All component functions (T-LP02 through T-LP08) defined
+- `export default function Home()` with `Layout` wrapper + all sections
+
+**Critical**: Remove `Redirect` import and usage entirely.
+
+**Acceptance criteria**: File saved; `npm run build` exits 0; no TS errors
+
+---
+
+### T-LP10 — Update custom.css dark-mode colors
+
+**File**: `book/src/css/custom.css`
+
+Change only `[data-theme='dark']` block — replace `#25c2a0` teal family with `#00bcd4` cyan family.
+
+**Acceptance criteria**: Only `[data-theme='dark']` block changed; light mode unchanged
+
+---
+
+### T-LP11 — TypeScript build verification
+
+Run: `cd "C:\Hackathon 1\book" && npm run build`
+
+**Acceptance criteria**: Build exits with code 0; no errors in output
+
+---
+
+### T-LP12 — Manual browser verification
+
+Run: `cd "C:\Hackathon 1\book" && npm start`
+
+Open: `http://localhost:3000/Physical-AI-Book/`
+
+**Acceptance criteria**:
+- [ ] Dark landing page visible (not redirect)
+- [ ] Neural canvas animating
+- [ ] "Start Reading →" navigates to intro
+- [ ] Stats counters animate on scroll
+- [ ] Module cards link correctly
+- [ ] Navbar (Auth) and footer unchanged
+- [ ] Docs pages still work
+- [ ] No console errors
 **Constitution**: `.specify/memory/constitution.md` v1.1.2
 **Submission Deadline**: Nov 30, 2025 at 06:00 PM
 **Max Score**: 300 pts (100 base + 4 × 50 bonus)
