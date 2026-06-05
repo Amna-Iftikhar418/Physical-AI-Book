@@ -15,13 +15,8 @@ from utils.retry import with_retry
 _MANIFEST_PATH = Path(__file__).parent.parent / "docs_manifest.json"
 _manifest: dict[str, str] | None = None
 
-
-def _get_manifest() -> dict[str, str]:
-    global _manifest
-    if _manifest is None:
-        with open(_MANIFEST_PATH, "r", encoding="utf-8") as f:
-            _manifest = json.load(f)
-    return _manifest
+# In-memory cache: (chapter_id, software_level, python, linux, hardware, ai_ml) -> result
+_cache: dict[tuple, str] = {}
 
 
 async def get_user_profile(user_id: str, db: AsyncSession) -> dict | None:
@@ -41,6 +36,17 @@ async def get_user_profile(user_id: str, db: AsyncSession) -> dict | None:
 
 
 async def personalize_chapter(chapter_id: str, profile: dict) -> str:
+    cache_key = (
+        chapter_id,
+        profile["software_level"],
+        profile["python_familiarity"],
+        profile["linux_familiarity"],
+        profile["hardware_background"],
+        profile["ai_ml_familiarity"],
+    )
+    if cache_key in _cache:
+        return _cache[cache_key]
+
     manifest = _get_manifest()
     chapter_text = manifest.get(chapter_id)
     if chapter_text is None:
@@ -60,4 +66,6 @@ async def personalize_chapter(chapter_id: str, profile: dict) -> str:
         response = await personalization_model.generate_content_async(prompt)
         return response.text
 
-    return await with_retry(_generate)
+    result = await with_retry(_generate)
+    _cache[cache_key] = result
+    return result

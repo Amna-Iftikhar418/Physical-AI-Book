@@ -10,6 +10,9 @@ from utils.retry import with_retry
 _MANIFEST_PATH = Path(__file__).parent.parent / "docs_manifest.json"
 _manifest: dict[str, str] | None = None
 
+# In-memory cache: chapter_id -> translated result
+_cache: dict[str, str] = {}
+
 
 def _get_manifest() -> dict[str, str]:
     global _manifest
@@ -20,6 +23,9 @@ def _get_manifest() -> dict[str, str]:
 
 
 async def translate_chapter(chapter_id: str) -> str:
+    if chapter_id in _cache:
+        return _cache[chapter_id]
+
     manifest = _get_manifest()
     chapter_text = manifest.get(chapter_id)
     if chapter_text is None:
@@ -35,4 +41,6 @@ async def translate_chapter(chapter_id: str) -> str:
         response = await translation_model.generate_content_async(prompt)
         return response.text
 
-    return await with_retry(_generate)
+    result = await with_retry(_generate)
+    _cache[chapter_id] = result
+    return result

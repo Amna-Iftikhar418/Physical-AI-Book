@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from google.api_core.exceptions import ResourceExhausted
+
 from auth import verify_token
 from db.connection import get_db
 from services.personalization import get_user_profile, personalize_chapter
@@ -40,6 +42,8 @@ async def personalize(
         personalized_text = await personalize_chapter(body.chapter_id, profile)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ResourceExhausted as exc:
+        raise HTTPException(status_code=429, detail="quota_exceeded") from exc
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"Personalization unavailable: {exc}") from exc
 

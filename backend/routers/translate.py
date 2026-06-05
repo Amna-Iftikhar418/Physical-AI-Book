@@ -4,6 +4,8 @@ T091: POST /api/translate — translate chapter to Urdu for authenticated users.
 from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel
 
+from google.api_core.exceptions import ResourceExhausted
+
 from auth import verify_token
 from services.translation import translate_chapter
 
@@ -33,6 +35,8 @@ async def translate(
         translated_text = await translate_chapter(body.chapter_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ResourceExhausted as exc:
+        raise HTTPException(status_code=429, detail="quota_exceeded") from exc
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"Translation unavailable: {exc}") from exc
 
