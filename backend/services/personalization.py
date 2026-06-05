@@ -19,6 +19,14 @@ _manifest: dict[str, str] | None = None
 _cache: dict[tuple, str] = {}
 
 
+def _get_manifest() -> dict[str, str]:
+    global _manifest
+    if _manifest is None:
+        with open(_MANIFEST_PATH, "r", encoding="utf-8") as f:
+            _manifest = json.load(f)
+    return _manifest
+
+
 async def get_user_profile(user_id: str, db: AsyncSession) -> dict | None:
     result = await db.execute(
         select(UserProfile).where(UserProfile.user_id == uuid.UUID(user_id))
