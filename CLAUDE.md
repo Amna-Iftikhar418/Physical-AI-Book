@@ -22,7 +22,7 @@ You are an expert AI assistant for this project. This file is the single source 
 |-------|-------|-------------|
 | Frontend (book) | Docusaurus 3.10.1, React 19, TypeScript | GitHub Pages |
 | Backend (API/RAG) | FastAPI + uvicorn, Python, `google-generativeai` SDK | Railway (Docker) |
-| Vector store | Qdrant Cloud — collection `chapter_chunks` | Qdrant Cloud free tier |
+| Vector store | pgvector on Neon Postgres — table `chapter_chunks` | Neon free tier (same DB) |
 | Relational DB | Neon Serverless Postgres — async via `asyncpg` | Neon free tier |
 | Auth | JWT (HS256, 24h expiry) via `python-jose` + `bcrypt` | In-process |
 
@@ -51,8 +51,6 @@ File lives at `C:\Hackathon 1\backend\.env` (not tracked in git).
 
 ```
 GOOGLE_API_KEY=...
-QDRANT_URL=...
-QDRANT_API_KEY=...
 DATABASE_URL=...             # Neon Postgres connection string (postgresql://)
 CORS_ORIGINS=http://localhost:3000,https://Amna-Iftikhar418.github.io
 JWT_SECRET_KEY=...           # or BETTER_AUTH_SECRET — used to sign/verify JWTs
@@ -70,9 +68,9 @@ JWT_SECRET_KEY=...           # or BETTER_AUTH_SECRET — used to sign/verify JWT
 | Personalization rewrite | `gemini-2.5-flash` | `personalization_model` in `agents.py` |
 | Translation (Urdu) | `gemini-2.5-flash` | `translation_model` in `agents.py` |
 | Embeddings | `models/gemini-embedding-2` | 3072 dims; `task_type` `retrieval_query`/`retrieval_document` |
-| Qdrant collection | `chapter_chunks` | `score_threshold=0.70`, `top_k=5`, COSINE distance |
+| pgvector table | `chapter_chunks` | `score_threshold=0.70`, `top_k=5`, cosine similarity (`<=>`) |
 
-> **Note**: The indexer (`index_to_qdrant.py`) uses `EMBEDDING_DIMS=3072`; the RAG query side (`rag.py`) uses the same model. These must stay in sync if the collection is ever rebuilt.
+> **Note**: The indexer (`index_to_qdrant.py`) uses `EMBEDDING_DIMS=3072`; the RAG query side (`rag.py`) uses the same model. These must stay in sync if the table is ever rebuilt.
 
 ---
 
@@ -94,13 +92,12 @@ JWT_SECRET_KEY=...           # or BETTER_AUTH_SECRET — used to sign/verify JWT
 | `services/agents.py` | Three Gemini models: `book_model`, `personalization_model`, `translation_model`; system prompts |
 | `services/personalization.py` | `personalize_chapter()`: reads `docs_manifest.json`, calls `personalization_model` |
 | `services/translation.py` | Translation service |
-| `db/models.py` | SQLAlchemy models: `User`, `UserProfile`, `Conversation`, `Message` |
+| `db/models.py` | SQLAlchemy models: `User`, `UserProfile`, `Conversation`, `Message`, `ChapterChunk` |
 | `db/connection.py` | Async engine (asyncpg), strips `sslmode`/`channel_binding` from URL, injects SSL context |
 | `db/migrations/` | Alembic migration versions |
-| `subagents/index_to_qdrant.py` | One-shot indexer: reads `docs_manifest.json`, chunks, embeds, upserts to Qdrant |
+| `subagents/index_to_qdrant.py` | One-shot indexer: reads `docs_manifest.json`, chunks, embeds, inserts to Neon Postgres (pgvector) |
 | `scripts/build_manifest.py` | Builds `docs_manifest.json` from book MDX files |
 | `utils/retry.py` | `with_retry()` — exponential backoff (2, 4, 8s) for `ResourceExhausted`/`ServiceUnavailable` |
-| `create_qdrant_indexes.py` | Standalone: creates payload indexes on `chapter_id` and `module_id` |
 | `Dockerfile` | Container for Railway deploy |
 
 ### Frontend (`book/`)
@@ -176,13 +173,14 @@ messages          id (UUID PK), conversation_id (FK→conversations), role ('use
                   content, created_at
 ```
 
-### Qdrant collection `chapter_chunks`
+### pgvector table `chapter_chunks` (Neon Postgres)
 
 ```
-Vector: 3072-dim COSINE (gemini-embedding-2 retrieval_document)
-Payload: chapter_id (keyword indexed), module_id (keyword indexed),
-         heading (str), text (str), char_start (int)
-Point ID: int from first 8 bytes of sha256(chapter_id:char_start)
+Columns: id (BIGINT PK), chapter_id (TEXT, indexed), module_id (TEXT),
+         heading (TEXT), text (TEXT), char_start (INT),
+         embedding vector(3072)
+Row ID: int from first 8 bytes of sha256(chapter_id:char_start)
+Distance: cosine (<=> operator), score = 1 - distance
 ```
 
 ---
@@ -199,12 +197,12 @@ Point ID: int from first 8 bytes of sha256(chapter_id:char_start)
 
 ## Indexing Pipeline
 
-To rebuild Qdrant index:
+To rebuild the pgvector index:
 1. `python backend/scripts/build_manifest.py` — regenerates `backend/docs_manifest.json` from MDX files
-2. `python backend/subagents/index_to_qdrant.py` — wipes + rebuilds `chapter_chunks` collection
+2. `python backend/subagents/index_to_qdrant.py` — drops + recreates `chapter_chunks` table in Neon Postgres
    - Chunks: 2000 chars (~500 tokens), 200 char overlap
    - Batches of 10, 5s sleep between batches
-   - **Deletes and recreates collection on every run**
+   - **Drops and recreates table on every run**
 
 Alternatively, use the `qdrant-indexer` Claude subagent: `.claude/agents/qdrant-indexer.md`
 
@@ -238,7 +236,7 @@ Alternatively, use the `qdrant-indexer` Claude subagent: `.claude/agents/qdrant-
 
 8. **Database SSL**: `db/connection.py` strips `sslmode` and `channel_binding` from the Neon connection URL and passes an `ssl` context via `connect_args`. Do not re-add these as URL params — asyncpg rejects them.
 
-9. **Embedding dimensions mismatch**: The Qdrant collection was created with `size=3072` (gemini-embedding-2). If you rebuild with a different model or dimension, you must delete and recreate the collection.
+9. **Embedding dimensions mismatch**: The `chapter_chunks` table was created with `vector(3072)` (gemini-embedding-2). If you rebuild with a different model or dimension, you must drop and recreate the table.
 
 10. **Chapter ID mapping**: The chat widget derives `chapter_id` from `window.location.pathname` by stripping `baseUrl`. The backend has a fallback: if `chapter_id` yields no chunks, it retries with `chapter_id + "/index"` (for module landing pages).
 
@@ -255,7 +253,7 @@ The frontend uses the **Neural Circuit** dark theme defined in `book/src/css/cus
 | Skill | How to invoke |
 |-------|--------------|
 | Generate chapter outline | `/generate-chapter-outline` |
-| Index book to Qdrant | Use `qdrant-indexer` subagent (`.claude/agents/qdrant-indexer.md`) |
+| Index book to pgvector | Use `qdrant-indexer` subagent (`.claude/agents/qdrant-indexer.md`) |
 | Spec-driven workflows | `/sp.specify`, `/sp.plan`, `/sp.tasks`, `/sp.implement`, `/sp.phr`, `/sp.adr` |
 
 ---

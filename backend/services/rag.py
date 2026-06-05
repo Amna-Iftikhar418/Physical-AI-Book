@@ -1,81 +1,70 @@
 """
-T048: RAG pipeline — embed query, search Qdrant, generate answer.
+RAG pipeline — embed query, search pgvector (Neon Postgres), generate answer.
 """
 from __future__ import annotations
 
 import google.generativeai as genai
-from qdrant_client import QdrantClient
-from qdrant_client.models import FieldCondition, Filter, MatchValue, PayloadSchemaType
+from sqlalchemy import text
 
-from config import QDRANT_URL, QDRANT_API_KEY
+from db.connection import AsyncSessionLocal
 from services.agents import book_model
 from utils.retry import with_retry
 
 EMBEDDING_MODEL = "models/gemini-embedding-2"
-COLLECTION_NAME = "chapter_chunks"
 TOP_K = 5
 SCORE_THRESHOLD = 0.70
 
-_qdrant: QdrantClient | None = None
-_index_ensured = False
 
-
-def _get_qdrant() -> QdrantClient:
-    global _qdrant, _index_ensured
-    if _qdrant is None:
-        _qdrant = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
-    if not _index_ensured:
-        for field in ("chapter_id", "module_id"):
-            try:
-                _qdrant.create_payload_index(
-                    collection_name=COLLECTION_NAME,
-                    field_name=field,
-                    field_schema=PayloadSchemaType.KEYWORD,
-                )
-            except Exception:
-                pass
-        _index_ensured = True
-    return _qdrant
-
-
-def embed_query(text: str) -> list[float]:
+def embed_query(query_text: str) -> list[float]:
     result = genai.embed_content(
         model=EMBEDDING_MODEL,
-        content=text,
+        content=query_text,
         task_type="retrieval_query",
     )
     emb = result["embedding"]
-    # embed_content returns a list of floats for single string input
     return emb if isinstance(emb[0], float) else emb[0]
 
 
-def search_qdrant(
+async def search_chunks(
     vector: list[float],
     chapter_id: str | None = None,
     top_k: int = TOP_K,
 ) -> list[dict]:
-    query_filter = None
-    if chapter_id:
-        query_filter = Filter(
-            must=[FieldCondition(key="chapter_id", match=MatchValue(value=chapter_id))]
-        )
+    vec_str = "[" + ",".join(str(float(x)) for x in vector) + "]"
 
-    result = _get_qdrant().query_points(
-        collection_name=COLLECTION_NAME,
-        query=vector,
-        limit=top_k,
-        score_threshold=SCORE_THRESHOLD,
-        query_filter=query_filter,
-        with_payload=True,
-    )
+    if chapter_id:
+        stmt = text("""
+            SELECT chapter_id, heading, text,
+                   (1 - (embedding <=> CAST(:vec AS vector)))::float AS score
+            FROM chapter_chunks
+            WHERE chapter_id = :chapter_id
+            ORDER BY embedding <=> CAST(:vec AS vector)
+            LIMIT :top_k
+        """)
+        params = {"vec": vec_str, "chapter_id": chapter_id, "top_k": top_k}
+    else:
+        stmt = text("""
+            SELECT chapter_id, heading, text,
+                   (1 - (embedding <=> CAST(:vec AS vector)))::float AS score
+            FROM chapter_chunks
+            ORDER BY embedding <=> CAST(:vec AS vector)
+            LIMIT :top_k
+        """)
+        params = {"vec": vec_str, "top_k": top_k}
+
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(stmt, params)
+        rows = result.fetchall()
+
     return [
         {
-            "chapter_id": h.payload.get("chapter_id", ""),
-            "heading": h.payload.get("heading", ""),
-            "text": h.payload.get("text", ""),
-            "score": h.score,
+            "chapter_id": row.chapter_id,
+            "heading": row.heading,
+            "text": row.text,
+            "score": row.score,
         }
-        for h in result.points
+        for row in rows
+        if row.score >= SCORE_THRESHOLD
     ]
 
 

@@ -1,5 +1,6 @@
 import uuid
-from sqlalchemy import Column, String, Text, ForeignKey, CheckConstraint, UniqueConstraint
+from pgvector.sqlalchemy import Vector
+from sqlalchemy import BigInteger, Column, Integer, String, Text, ForeignKey, CheckConstraint, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from sqlalchemy.types import TIMESTAMP
@@ -60,6 +61,18 @@ class UserProfile(Base):
         nullable=False,
     )
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
+
+
+class ChapterChunk(Base):
+    __tablename__ = "chapter_chunks"
+
+    id = Column(BigInteger, primary_key=True)
+    chapter_id = Column(Text, nullable=False, index=True)
+    module_id = Column(Text, nullable=False)
+    heading = Column(Text)
+    text = Column(Text, nullable=False)
+    char_start = Column(Integer, nullable=False)
+    embedding = Column(Vector(3072))
 
 
 class Conversation(Base):

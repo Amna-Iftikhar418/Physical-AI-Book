@@ -70,9 +70,11 @@ if _startup_err:
 async def lifespan(app: FastAPI):
     import db.models  # noqa: F401 — registers models on Base.metadata
     from db.connection import engine, Base
+    from sqlalchemy import text
     for attempt in range(3):
         try:
             async with engine.begin() as conn:
+                await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
                 await conn.run_sync(Base.metadata.create_all)
             print("DB tables created/verified OK")
             break

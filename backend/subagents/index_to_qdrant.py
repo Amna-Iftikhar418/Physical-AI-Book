@@ -1,53 +1,39 @@
 """
-T044/T045: Index book chapters into Qdrant.
+Index book chapters into Neon Postgres using pgvector.
 - Reads docs_manifest.json
 - Chunks each chapter (~500 tokens, 50-token overlap)
-- Embeds with text-embedding-004 (768 dims)
-- Upserts into Qdrant 'chapter_chunks' collection
-Point ID = sha256(chapter_id + str(char_start))
+- Embeds with gemini-embedding-2 (3072 dims)
+- Drops and recreates chapter_chunks table, then inserts all vectors
 """
-import asyncio
 import hashlib
 import json
+import re
 import sys
 import time
 from pathlib import Path
 
 import google.generativeai as genai
-from qdrant_client import QdrantClient
-from qdrant_client.models import (
-    Distance,
-    PayloadSchemaType,
-    PointStruct,
-    VectorParams,
-)
+import psycopg2
+from pgvector.psycopg2 import register_vector
 
-# Path resolution: backend/ parent is repo root
 BACKEND_DIR = Path(__file__).parent.parent
 sys.path.insert(0, str(BACKEND_DIR))
 
-from config import GOOGLE_API_KEY, QDRANT_URL, QDRANT_API_KEY
+from config import GOOGLE_API_KEY, DATABASE_URL
 
 MANIFEST_PATH = BACKEND_DIR / "docs_manifest.json"
-COLLECTION_NAME = "chapter_chunks"
 EMBEDDING_MODEL = "models/gemini-embedding-2"
 EMBEDDING_DIMS = 3072
-CHUNK_CHARS = 2000        # ~500 tokens at 4 chars/token
-OVERLAP_CHARS = 200       # ~50 tokens overlap
+CHUNK_CHARS = 2000
+OVERLAP_CHARS = 200
 BATCH_SIZE = 10
 BATCH_SLEEP_SECONDS = 5
 
 
-def make_point_id(chapter_id: str, char_start: int) -> str:
-    raw = f"{chapter_id}:{char_start}"
-    return hashlib.sha256(raw.encode()).hexdigest()[:16]  # 64-bit hex string → int
-
-
-def make_point_id_int(chapter_id: str, char_start: int) -> int:
+def make_point_id(chapter_id: str, char_start: int) -> int:
     raw = f"{chapter_id}:{char_start}"
     digest = hashlib.sha256(raw.encode()).digest()
-    # Take first 8 bytes as unsigned int
-    return int.from_bytes(digest[:8], "big")
+    return int.from_bytes(digest[:8], "big", signed=True)
 
 
 def chunk_text(text: str, chapter_id: str) -> list[dict]:
@@ -55,47 +41,45 @@ def chunk_text(text: str, chapter_id: str) -> list[dict]:
     start = 0
     while start < len(text):
         end = min(start + CHUNK_CHARS, len(text))
-        chunk_text = text[start:end]
-
-        # Extract heading from first line if available
-        lines = chunk_text.strip().split("\n")
+        chunk = text[start:end]
+        lines = chunk.strip().split("\n")
         heading = lines[0][:80] if lines else ""
-
-        # Infer module_id from chapter_id prefix
         parts = chapter_id.split("/")
         module_id = parts[0] if parts else chapter_id
-
         chunks.append({
             "chapter_id": chapter_id,
             "module_id": module_id,
             "heading": heading,
-            "text": chunk_text,
+            "text": chunk,
             "char_start": start,
         })
         start += CHUNK_CHARS - OVERLAP_CHARS
     return chunks
 
 
-def setup_collection(client: QdrantClient) -> None:
-    existing = [c.name for c in client.get_collections().collections]
-    if COLLECTION_NAME in existing:
-        client.delete_collection(COLLECTION_NAME)
+def _clean_url(url: str) -> str:
+    # psycopg2 handles sslmode=require natively; strip channel_binding which it doesn't support
+    return re.sub(r"[?&]channel_binding=[^&]*", "", url).rstrip("?&")
 
-    client.create_collection(
-        collection_name=COLLECTION_NAME,
-        vectors_config=VectorParams(size=EMBEDDING_DIMS, distance=Distance.COSINE),
-    )
-    client.create_payload_index(
-        collection_name=COLLECTION_NAME,
-        field_name="chapter_id",
-        field_schema=PayloadSchemaType.KEYWORD,
-    )
-    client.create_payload_index(
-        collection_name=COLLECTION_NAME,
-        field_name="module_id",
-        field_schema=PayloadSchemaType.KEYWORD,
-    )
-    print(f"Collection '{COLLECTION_NAME}' created (size={EMBEDDING_DIMS}, COSINE)")
+
+def setup_table(conn) -> None:
+    cur = conn.cursor()
+    cur.execute("DROP TABLE IF EXISTS chapter_chunks")
+    cur.execute(f"""
+        CREATE TABLE chapter_chunks (
+            id BIGINT PRIMARY KEY,
+            chapter_id TEXT NOT NULL,
+            module_id TEXT NOT NULL,
+            heading TEXT,
+            text TEXT NOT NULL,
+            char_start INTEGER NOT NULL,
+            embedding vector({EMBEDDING_DIMS})
+        )
+    """)
+    cur.execute("CREATE INDEX ON chapter_chunks (chapter_id)")
+    conn.commit()
+    cur.close()
+    print(f"Table 'chapter_chunks' created (dims={EMBEDDING_DIMS})")
 
 
 def embed_texts(texts: list[str]) -> list[list[float]]:
@@ -104,22 +88,30 @@ def embed_texts(texts: list[str]) -> list[list[float]]:
         content=texts,
         task_type="retrieval_document",
     )
-    return result["embedding"] if isinstance(result["embedding"][0], list) else [result["embedding"]]
+    emb = result["embedding"]
+    return emb if isinstance(emb[0], list) else [emb]
 
 
 def index_manifest(manifest: dict) -> None:
     genai.configure(api_key=GOOGLE_API_KEY)
-    client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
+    conn = psycopg2.connect(_clean_url(DATABASE_URL))
 
-    setup_collection(client)
+    # Extension must exist before register_vector queries the pg_type catalog
+    cur = conn.cursor()
+    cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
+    conn.commit()
+    cur.close()
+
+    register_vector(conn)
+    setup_table(conn)
 
     all_chunks: list[dict] = []
     for chapter_id, text in manifest.items():
-        chunks = chunk_text(text, chapter_id)
-        all_chunks.extend(chunks)
+        all_chunks.extend(chunk_text(text, chapter_id))
 
     print(f"Total chunks to index: {len(all_chunks)}")
     failed: list[str] = []
+    cur = conn.cursor()
 
     for i in range(0, len(all_chunks), BATCH_SIZE):
         batch = all_chunks[i: i + BATCH_SIZE]
@@ -133,27 +125,34 @@ def index_manifest(manifest: dict) -> None:
                 failed.append(c["chapter_id"])
             continue
 
-        points = [
-            PointStruct(
-                id=make_point_id_int(c["chapter_id"], c["char_start"]),
-                vector=v,
-                payload={
-                    "chapter_id": c["chapter_id"],
-                    "module_id": c["module_id"],
-                    "heading": c["heading"],
-                    "text": c["text"],
-                    "char_start": c["char_start"],
-                },
+        rows = [
+            (
+                make_point_id(c["chapter_id"], c["char_start"]),
+                c["chapter_id"],
+                c["module_id"],
+                c["heading"],
+                c["text"],
+                c["char_start"],
+                v,
             )
             for c, v in zip(batch, vectors)
         ]
-        client.upsert(collection_name=COLLECTION_NAME, points=points)
-        print(f"  Indexed batch {i}–{i+len(batch)-1} ({len(points)} points)")
+        cur.executemany(
+            "INSERT INTO chapter_chunks (id, chapter_id, module_id, heading, text, char_start, embedding) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            rows,
+        )
+        conn.commit()
+        print(f"  Indexed batch {i}–{i+len(batch)-1} ({len(rows)} rows)")
 
         if i + BATCH_SIZE < len(all_chunks):
             time.sleep(BATCH_SLEEP_SECONDS)
 
-    count = client.count(COLLECTION_NAME).count
+    cur.execute("SELECT COUNT(*) FROM chapter_chunks")
+    count = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+
     print(f"\nIndexing complete. Total points in collection: {count}")
     if failed:
         print(f"WARNING: Failed chapters: {set(failed)}", file=sys.stderr)

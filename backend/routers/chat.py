@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.connection import get_db
 from db.models import Conversation, Message
-from services.rag import embed_query, search_qdrant, run_rag_query
+from services.rag import embed_query, search_chunks, run_rag_query
 
 router = APIRouter(prefix="/api", tags=["chat"])
 
@@ -50,10 +50,10 @@ async def _run_chat(
 ) -> ChatResponse:
     try:
         vector = embed_query(query)
-        chunks = search_qdrant(vector, chapter_id=chapter_id)
+        chunks = await search_chunks(vector, chapter_id=chapter_id)
         # Landing pages are served at '/module-x/' but stored as 'module-x/index'.
         if chapter_id and not chunks and not chapter_id.endswith("/index"):
-            chunks = search_qdrant(vector, chapter_id=f"{chapter_id}/index")
+            chunks = await search_chunks(vector, chapter_id=f"{chapter_id}/index")
         answer = await run_rag_query(query, chunks)
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"RAG pipeline unavailable: {exc}") from exc
