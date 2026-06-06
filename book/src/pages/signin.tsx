@@ -3,9 +3,11 @@ import Layout from '@theme/Layout';
 import { authClient } from '../lib/auth-client';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
+
 export default function SigninPage(): React.ReactElement {
   const homeUrl = useBaseUrl('/');
   const signupUrl = useBaseUrl('/signup');
+  const forgotUrl = useBaseUrl('/forgot-password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -84,6 +86,16 @@ export default function SigninPage(): React.ReactElement {
                     </svg>
                   )}
                 </button>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <a
+                  href={forgotUrl}
+                  style={{ fontFamily: "'Outfit', sans-serif", fontSize: '0.75rem', color: '#505070', textDecoration: 'none', transition: 'color 0.18s' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#7a9adf'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = '#505070'; }}
+                >
+                  Forgot password?
+                </a>
               </div>
             </Field>
 

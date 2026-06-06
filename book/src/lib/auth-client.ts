@@ -131,6 +131,13 @@ export const authClient = {
     }
   },
 
+  async resetPassword(email: string, newPassword: string): Promise<void> {
+    await apiFetch<{ message: string }>('/api/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ email, new_password: newPassword }),
+    });
+  },
+
   async getSession(): Promise<UserSession | null> {
     const token = getToken();
     if (!token) return null;

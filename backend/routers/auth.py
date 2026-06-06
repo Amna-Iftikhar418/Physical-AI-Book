@@ -30,6 +30,11 @@ class SigninRequest(BaseModel):
     password: str
 
 
+class ResetPasswordRequest(BaseModel):
+    email: str
+    new_password: str
+
+
 async def _bearer_user_id(authorization: str = Header(None)) -> str:
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
@@ -87,6 +92,19 @@ async def signin(body: SigninRequest, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     return {"user_id": str(user.id), "token": create_access_token(str(user.id))}
+
+
+@router.post("/auth/reset-password")
+async def reset_password(body: ResetPasswordRequest, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.email == body.email))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="No account found with that email")
+    if len(body.new_password) < 8:
+        raise HTTPException(status_code=422, detail="Password must be at least 8 characters")
+    user.hashed_password = hash_password(body.new_password)
+    await db.commit()
+    return {"message": "Password updated successfully"}
 
 
 @router.get("/auth/session")
