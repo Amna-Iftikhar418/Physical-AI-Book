@@ -51,8 +51,10 @@ export function AuthButton(): React.ReactElement {
   const homeUrl = useBaseUrl('/');
   const [session, setSession] = useState<UserSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const [returning, setReturning] = useState(false);
 
   useEffect(() => {
+    setReturning(authClient.hasAccount());
     const cached = authClient.getCachedUser();
     if (cached) { setSession(cached); setLoading(false); }
     authClient.getSession().then((s) => { setSession(s); setLoading(false); });
@@ -78,14 +80,17 @@ export function AuthButton(): React.ReactElement {
     );
   }
 
-  return (
-    <>
+  if (returning) {
+    return (
       <a href={signinUrl} style={pill} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
         Sign In
       </a>
-      <a href={signupUrl} style={pill} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
-        Sign Up
-      </a>
-    </>
+    );
+  }
+
+  return (
+    <a href={signupUrl} style={pill} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+      Sign Up
+    </a>
   );
 }

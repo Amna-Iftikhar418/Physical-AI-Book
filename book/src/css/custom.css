@@ -1817,6 +1817,13 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
   }
 }
 
+/* ── Auth navbar items: only visible in mobile hamburger menu ── */
+@media (min-width: 997px) {
+  .navbar-mobile-auth {
+    display: none !important;
+  }
+}
+
 /* ── Navbar title: truncate on very small screens to prevent overflow ── */
 @media (max-width: 360px) {
   .navbar__title {

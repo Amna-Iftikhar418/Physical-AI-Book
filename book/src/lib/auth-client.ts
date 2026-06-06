@@ -6,6 +6,7 @@ const BASE_URL = (
 
 const TOKEN_KEY = 'physical_ai_auth_token';
 const USER_KEY = 'physical_ai_auth_user';
+const HAS_ACCOUNT_KEY = 'physical_ai_has_account';
 
 export interface UserSession {
   user_id: string;
@@ -39,6 +40,7 @@ function setToken(token: string, user: UserSession): void {
   try {
     localStorage.setItem(TOKEN_KEY, token);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
+    localStorage.setItem(HAS_ACCOUNT_KEY, '1');
   } catch {
     // ignore storage errors
   }
@@ -120,6 +122,14 @@ export const authClient = {
   getToken,
 
   getCachedUser,
+
+  hasAccount(): boolean {
+    try {
+      return localStorage.getItem(HAS_ACCOUNT_KEY) === '1';
+    } catch {
+      return false;
+    }
+  },
 
   async getSession(): Promise<UserSession | null> {
     const token = getToken();
