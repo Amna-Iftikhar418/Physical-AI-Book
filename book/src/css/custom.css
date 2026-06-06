@@ -1833,6 +1833,13 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
   }
 }
 
+/* ── Top-bar auth wrapper: hide on mobile (hamburger menu handles auth) ── */
+@media (max-width: 996px) {
+  .navbar-auth-wrapper {
+    display: none !important;
+  }
+}
+
 /* ── Navbar title: truncate on very small screens to prevent overflow ── */
 @media (max-width: 360px) {
   .navbar__title {
