@@ -140,29 +140,40 @@ export function ChatPanel({
           width: 390px;
           height: 580px;
         }
+        @media (max-width: 768px) {
+          .chat-panel {
+            width: min(390px, calc(100vw - 2rem));
+            right: 1rem;
+          }
+        }
+        @media (max-width: 640px) {
+          .chat-panel {
+            width: calc(100vw - 2rem);
+            height: calc(100svh - 7rem);
+            max-height: 580px;
+            right: 1rem;
+            bottom: 5.5rem;
+          }
+        }
         @media (max-width: 460px) {
           .chat-panel {
-            width: calc(100vw - 1.5rem) !important;
-            height: calc(100vh - 6.5rem) !important;
-            max-height: 580px !important;
-            right: 0.75rem !important;
-            bottom: 5rem !important;
+            width: calc(100vw - 1.5rem);
+            height: calc(100svh - 6.5rem);
+            max-height: 560px;
+            right: 0.75rem;
+            bottom: 5rem;
           }
         }
         @media (max-width: 360px) {
           .chat-panel {
-            width: calc(100vw - 1rem) !important;
-            right: 0.5rem !important;
+            width: calc(100vw - 1rem);
+            right: 0.5rem;
+            height: calc(100svh - 6rem);
           }
         }
       `}</style>
 
       <div className="chat-panel" style={{
-        position: 'fixed',
-        bottom: 88,
-        right: 20,
-        width: 390,
-        height: 580,
         display: 'flex',
         flexDirection: 'column',
         zIndex: 9999,
@@ -225,13 +236,15 @@ export function ChatPanel({
               borderRadius: 8,
               color: '#94a3b8',
               cursor: 'pointer',
-              width: 30,
-              height: 30,
+              width: 44,
+              height: 44,
+              minWidth: 44,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
               transition: 'background 0.15s, color 0.15s',
+              touchAction: 'manipulation',
             }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)'; (e.currentTarget as HTMLButtonElement).style.color = '#f1f5f9'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLButtonElement).style.color = '#94a3b8'; }}
@@ -495,8 +508,9 @@ export function ChatPanel({
               disabled={loading || !input.trim()}
               aria-label="Send message"
               style={{
-                width: 34,
-                height: 34,
+                width: 44,
+                height: 44,
+                minWidth: 44,
                 borderRadius: 10,
                 background: 'linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)',
                 border: 'none',
@@ -507,6 +521,7 @@ export function ChatPanel({
                 flexShrink: 0,
                 boxShadow: '0 4px 12px rgba(59,130,246,0.35)',
                 transition: 'background 0.15s, transform 0.15s, box-shadow 0.15s',
+                touchAction: 'manipulation',
               }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

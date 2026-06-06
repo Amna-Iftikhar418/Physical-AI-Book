@@ -3,24 +3,6 @@ import siteConfig from '@generated/docusaurus.config';
 import { ChatPanel } from '../components/ChatWidget/ChatPanel';
 import { SelectionButton } from '../components/ChatWidget/SelectionButton';
 
-const FAB_STYLE: React.CSSProperties = {
-  position: 'fixed',
-  bottom: 20,
-  right: 20,
-  width: 52,
-  height: 52,
-  borderRadius: '50%',
-  background: 'var(--ifm-color-primary, #0969da)',
-  color: '#fff',
-  border: 'none',
-  cursor: 'pointer',
-  fontSize: 24,
-  boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 9998,
-};
 
 // Docs are served at the site root (routeBasePath '/'), under baseUrl
 // (e.g. '/Physical-AI-Book/'). Strip baseUrl to recover the chapter_id,
@@ -98,7 +80,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
         />
       )}
       <button
-        style={FAB_STYLE}
+        className="chatFab"
         onClick={handleFabClick}
         aria-label={chatOpen ? 'Close chat' : 'Open chat'}
         title="Ask the textbook"

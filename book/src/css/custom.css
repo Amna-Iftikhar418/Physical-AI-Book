@@ -1540,6 +1540,25 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
    Mobile-first enhancements across all screen sizes
 ═══════════════════════════════════════════════════════════ */
 
+/* ── Prevent horizontal overflow globally ── */
+html, body {
+  overflow-x: hidden;
+}
+
+/* ── Fluid body text: scales smoothly across all viewports ── */
+.markdown {
+  font-size: clamp(1rem, 1.8vw, 1.15rem);
+}
+
+/* ── Global word-break safety net ── */
+.markdown p,
+.markdown li,
+.markdown td,
+.markdown th {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
 /* ── Tables: horizontal scroll on all screens ── */
 .markdown table {
   display: block;
@@ -1548,11 +1567,107 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
   max-width: 100%;
 }
 
-/* ── Inline code: allow wrapping on narrow screens ── */
+/* ── Breadcrumbs: wrap on narrow screens ── */
+.breadcrumbs__list {
+  flex-wrap: wrap;
+}
+
+/* ── Sign-up survey grid: 2-col desktop → 1-col mobile ── */
+.signupSurveyGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+/* ── Footer responsive grid ── */
+.footerMainGrid {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3.5rem 2rem 0;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+/* ── Chat FAB button ── */
+.chatFab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--ifm-color-primary, #0969da);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9998;
+  transition: transform 0.18s, box-shadow 0.18s;
+  touch-action: manipulation;
+}
+
+.chatFab:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Doc sidebar: slightly narrower on narrow desktop ── */
+@media (max-width: 1024px) and (min-width: 997px) {
+  .theme-doc-sidebar-container {
+    min-width: 230px;
+    width: 230px;
+  }
+}
+
+/* ── Tablet: tighten article gutters and spacing ── */
+@media (max-width: 900px) {
+  :root {
+    --ifm-spacing-horizontal: 1.5rem;
+  }
+  article {
+    padding-top: 1.5rem;
+    padding-bottom: 2.5rem;
+  }
+}
+
+/* ── Footer: 2-column on tablet ── */
+@media (max-width: 900px) {
+  .footerMainGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+}
+
+/* ── Sidebar: bigger touch targets on tablet / mobile sidebar drawer ── */
+@media (max-width: 996px) {
+  [data-theme='dark'] .menu__link,
+  [data-theme='light'] .menu__link {
+    min-height: 44px;
+    padding-top: 0.55rem !important;
+    padding-bottom: 0.55rem !important;
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* ── Markdown headings: scale down on tablet ── */
+@media (max-width: 768px) {
+  .markdown h1 { font-size: 1.75rem !important; }
+  .markdown h2 { font-size: 1.65rem !important; }
+  .markdown h3 { font-size: 1.3rem !important; }
+}
+
+/* ── Navbar: reduce height on mobile ── */
 @media (max-width: 640px) {
-  :not(pre) > code {
-    white-space: normal;
-    word-break: break-word;
+  .navbar {
+    height: 56px;
+    padding: 0 1rem;
   }
 }
 
@@ -1567,16 +1682,19 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
   }
 }
 
-/* ── Navbar: tighter on mobile ── */
+/* ── Markdown headings: further reduce on mobile ── */
 @media (max-width: 640px) {
-  .navbar {
-    padding: 0 1rem;
-  }
+  .markdown h1 { font-size: 1.65rem !important; }
+  .markdown h2 { font-size: 1.5rem !important; }
+  .markdown h3 { font-size: 1.25rem !important; }
 }
 
-/* ── Breadcrumbs: wrap on narrow screens ── */
-.breadcrumbs__list {
-  flex-wrap: wrap;
+/* ── Inline code: allow wrapping on narrow screens ── */
+@media (max-width: 640px) {
+  :not(pre) > code {
+    white-space: normal;
+    word-break: break-word;
+  }
 }
 
 /* ── Blockquotes: tighter padding on mobile ── */
@@ -1585,6 +1703,7 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
   [data-theme='light'] blockquote {
     padding: 0.75rem 1rem;
     margin: 1.25rem 0;
+    font-size: 1rem;
   }
 }
 
@@ -1599,53 +1718,38 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
   }
 }
 
-/* ── Markdown headings: scale down on very small phones ── */
-@media (max-width: 375px) {
-  .markdown h1 { font-size: 1.6rem !important; }
-  .markdown h2 { font-size: 1.45rem !important; }
-  .markdown h3 { font-size: 1.2rem !important; }
-}
-
-/* ── Auth card: responsive padding ── */
-@media (max-width: 480px) {
-  .authCard {
-    padding: 1.75rem 1.25rem !important;
+/* ── Pagination: stack on mobile ── */
+@media (max-width: 640px) {
+  .pagination-nav {
+    flex-direction: column;
+    gap: 0.75rem;
   }
 }
 
-/* ── Sign-up survey grid: 2-col desktop → 1-col mobile ── */
-.signupSurveyGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.85rem;
+/* ── Chat FAB: tighter position on mobile ── */
+@media (max-width: 640px) {
+  .chatFab {
+    bottom: 16px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
 }
+
+/* ── Footer: single column on mobile ── */
+@media (max-width: 560px) {
+  .footerMainGrid {
+    grid-template-columns: 1fr;
+    padding: 2.5rem 1.25rem 0;
+    gap: 1.75rem;
+  }
+}
+
+/* ── Sign-up survey grid: 1-col on mobile ── */
 @media (max-width: 560px) {
   .signupSurveyGrid {
     grid-template-columns: 1fr;
-  }
-}
-
-/* ── Footer responsive grid ── */
-.footerMainGrid {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 3.5rem 2rem 0;
-  display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr;
-  gap: 2.5rem;
-  align-items: start;
-}
-@media (max-width: 900px) {
-  .footerMainGrid {
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-}
-@media (max-width: 560px) {
-  .footerMainGrid {
-    grid-template-columns: 1fr;
-    padding: 2.5rem 1.5rem 0;
-    gap: 2rem;
   }
 }
 
@@ -1660,11 +1764,17 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
   }
 }
 
-/* ── Pagination: stack on mobile ── */
-@media (max-width: 640px) {
-  .pagination-nav {
-    flex-direction: column;
-    gap: 0.75rem;
+/* ── Auth card: responsive padding ── */
+@media (max-width: 480px) {
+  .authCard {
+    padding: 1.75rem 1.25rem !important;
+  }
+}
+
+/* ── Navbar items: tighter gap on small screens ── */
+@media (max-width: 480px) {
+  .navbar__items--right {
+    gap: 0.25rem;
   }
 }
 
@@ -1687,15 +1797,9 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
   }
 }
 
-/* ── Prevent horizontal overflow globally ── */
-html, body {
-  overflow-x: hidden;
-}
-
-/* ── Doc sidebar: slightly narrower on narrow desktop ── */
-@media (max-width: 1024px) and (min-width: 997px) {
-  .theme-doc-sidebar-container {
-    min-width: 230px;
-    width: 230px;
-  }
+/* ── Markdown headings: minimum scale for very small phones ── */
+@media (max-width: 375px) {
+  .markdown h1 { font-size: 1.5rem !important; }
+  .markdown h2 { font-size: 1.35rem !important; }
+  .markdown h3 { font-size: 1.15rem !important; }
 }
