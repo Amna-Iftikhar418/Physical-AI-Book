@@ -1809,6 +1809,15 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
   }
 }
 
+/* ── Action pill bar: full-width row on small screens ── */
+@media (max-width: 640px) {
+  .actionPillBar {
+    width: 100%;
+    padding-left: 0;
+    margin-top: 0.15rem;
+  }
+}
+
 /* ── Action pill buttons: compact on very small screens ── */
 @media (max-width: 360px) {
   .actionPillBtn {
