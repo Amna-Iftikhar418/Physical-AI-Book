@@ -9,6 +9,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap');
 
 /* ═══════════════════════════════════════════════════════════
+   GLOBAL RESET — box model + overflow guard
+   Must come before all other rules so padding/border never
+   add to element widths and the root never scrolls sideways.
+═══════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Setting overflow-x on html (the ICB) is the authoritative way to block
+     horizontal scrolling. The body rule below backs it up for iOS Safari. */
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  /* max-width: 100% keeps the body from expanding wider than the viewport even
+     when a deeply-nested child is absolutely/fixed-positioned off-screen. */
+  max-width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════
    GLOBAL FONT BASELINE
 ═══════════════════════════════════════════════════════════ */
 
@@ -1540,11 +1566,6 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
    Mobile-first enhancements across all screen sizes
 ═══════════════════════════════════════════════════════════ */
 
-/* ── Prevent horizontal overflow globally ── */
-html, body {
-  overflow-x: hidden;
-}
-
 /* ── Fluid body text: scales smoothly across all viewports ── */
 .markdown {
   font-size: clamp(1rem, 1.8vw, 1.15rem);
@@ -1615,6 +1636,16 @@ html, body {
 .chatFab:hover {
   transform: scale(1.06);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Navbar: prevent right-side items from overflowing on mobile ──
+   On mobile Docusaurus uses a slide-in drawer, so clipping the bar
+   itself won't cut off any dropdown. Desktop (>996px) is excluded to
+   avoid clipping mega-menus or popovers. */
+@media (max-width: 996px) {
+  .navbar {
+    overflow-x: hidden;
+  }
 }
 
 /* ── Doc sidebar: slightly narrower on narrow desktop ── */

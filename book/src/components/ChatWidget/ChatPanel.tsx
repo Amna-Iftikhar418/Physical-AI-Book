@@ -137,8 +137,11 @@ export function ChatPanel({
           position: fixed;
           bottom: 88px;
           right: 20px;
-          width: 390px;
+          /* min() ensures panel never exceeds viewport even at the 390px fixed size */
+          width: min(390px, calc(100vw - 40px));
           height: 580px;
+          /* Hard overflow guard: internal content must never push the panel wider */
+          overflow: hidden;
         }
         @media (max-width: 768px) {
           .chat-panel {

@@ -7,11 +7,21 @@ interface SelectionButtonProps {
 }
 
 export function SelectionButton({ x, y, onClick }: SelectionButtonProps) {
+  // Clamp x so the button never extends past the viewport edges.
+  // The button is ~140px wide; we need at least 70px clearance on each side.
+  const HALF_WIDTH = 74;
+  const EDGE_GAP = 8;
+  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+  const safeX = Math.min(
+    Math.max(x, HALF_WIDTH + EDGE_GAP),
+    viewportWidth - HALF_WIDTH - EDGE_GAP,
+  );
+
   return (
     <button
       style={{
         position: 'fixed',
-        left: x,
+        left: safeX,
         top: Math.max(y - 46, 5),
         transform: 'translateX(-50%)',
         background: 'linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)',
