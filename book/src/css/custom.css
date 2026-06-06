@@ -1840,6 +1840,21 @@ div[class*='codeBlockContainer']:hover button[class*='clean-btn'] {
   }
 }
 
+/* ── Move hamburger toggle to the right on mobile ── */
+@media (max-width: 996px) {
+  .navbar__inner {
+    flex-wrap: nowrap;
+  }
+  .navbar__toggle {
+    order: 99;
+    margin-left: auto;
+    margin-right: 0;
+  }
+  .navbar__brand {
+    margin-right: auto;
+  }
+}
+
 /* ── Navbar title: truncate on very small screens to prevent overflow ── */
 @media (max-width: 360px) {
   .navbar__title {
