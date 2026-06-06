@@ -632,6 +632,10 @@
 }
 
 @media (max-width: 768px) {
+  .hero {
+    min-height: calc(100vh - var(--ifm-navbar-height));
+  }
+
   .heroTitle {
     font-size: 2.5rem;
   }
