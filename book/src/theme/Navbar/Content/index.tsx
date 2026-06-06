@@ -6,8 +6,7 @@ export default function NavbarContentWrapper(props: Record<string, unknown>): Re
   return (
     <>
       <NavbarContent {...props} />
-      {/* flexShrink: 1 lets this wrapper compress when the navbar is narrow (mobile) */}
-      <div className="navbar-auth-wrapper" style={{ marginLeft: 'auto', marginRight: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 1, paddingLeft: '0.5rem', minWidth: 0, overflow: 'hidden' }}>
+      <div className="navbar-auth-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingRight: '1rem' }}>
         <AuthButton />
       </div>
     </>
